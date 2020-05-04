@@ -7,7 +7,7 @@
     android:background="@color/colorPrimary"
     tools:context=".MainActivity">
 
-    //camera button
+    <!--camera button-->
     <ImageButton
         android:id="@+id/cameraButton"
         android:layout_width="wrap_content"
@@ -22,7 +22,7 @@
         app:layout_constraintVertical_bias="0.642"
         app:srcCompat="@drawable/ic_camera" />
 
-    //gallery button
+    <!--gallery button-->
     <ImageButton
         android:id="@+id/galleryButton"
         android:layout_width="wrap_content"
@@ -37,7 +37,7 @@
         app:layout_constraintVertical_bias="0.642"
         app:srcCompat="@drawable/ic_gallery" />
 
-    //cube button
+    <!--cube button-->
     <ImageButton
         android:id="@+id/cubeButton"
         android:layout_width="wrap_content"
@@ -50,19 +50,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.773"
         app:srcCompat="@drawable/ic_cube" />
-
-    //viewing a photo from camera
-
-    <ImageView
-        android:id="@+id/viewer"
-        android:layout_width="447dp"
-        android:layout_height="663dp"
-        android:background="#00222222"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

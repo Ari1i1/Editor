@@ -1,19 +1,16 @@
 package com.example.editor
 
 import android.app.Activity
-import android.content.ContentResolver
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import kotlinx.android.synthetic.main.activity_main.*
 import android.os.Build
+import android.os.Bundle
 import android.provider.MediaStore
-import android.widget.ImageView
 import android.widget.Toast
-import java.util.jar.Manifest
+import androidx.appcompat.app.AppCompatActivity
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -45,8 +42,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             else {
-            //android version < Marshmallow
-            openCamera()
+                //android version < Marshmallow
+                openCamera()
             }
         }
     }
@@ -87,8 +84,12 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         //called when image was captured from camera intent
         if (resultCode == Activity.RESULT_OK) {
-            //set image captured to image view
-            viewer.setImageURI(image_uri)
+            //save the image Я НЕ ПРИДУМАЛА ЭТО ЕЩЕ
+            //и устала писать на инглише, да
+
+            //creating and opening a new activity
+            val editingActivityIntent = Intent(this, EditingActivity::class.java)
+            startActivity(editingActivityIntent)
         }
     }
 }
