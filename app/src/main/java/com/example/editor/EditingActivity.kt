@@ -11,6 +11,9 @@ class EditingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_editing)
 
-        //а тут будем выводить сохраненное фото
+        val uriString:String? = intent.getStringExtra("imageUri")
+
+        val uri = Uri.parse(uriString)
+        imageView.setImageURI(uri)
     }
 }
