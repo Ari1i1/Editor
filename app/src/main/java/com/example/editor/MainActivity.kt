@@ -8,9 +8,12 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,6 +26,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        //if the camera button is clicked
         cameraButton.setOnClickListener {
             //if android version is Marshmallow and above
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -48,6 +52,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        //if the gallery button is clicked
         galleryButton.setOnClickListener {
             //check runtime permission
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
@@ -99,7 +104,9 @@ class MainActivity : AppCompatActivity() {
             PERMISSION_CODE -> {
                 if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //permission from pop-up was granted
+                    //???????????????????????????????
                     openCamera()
+                    pickImageFromGallery()
                 }
                 else {
                     //permission from pop-up was denied
@@ -113,12 +120,10 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         //called when image was captured from camera intent
         if (resultCode == Activity.RESULT_OK) {
-            //save the image Я НЕ ПРИДУМАЛА ЭТО ЕЩЕ
-            //и устала писать на инглише, да
-
             //creating and opening a new activity
-            val editingActivityIntent = Intent(this, EditingActivity::class.java)
-            startActivity(editingActivityIntent)
+            val newActivityIntent = Intent(this, EditingActivity::class.java)
+            newActivityIntent.putExtra("imageUri", image_uri.toString())
+            startActivity(newActivityIntent)
         }
     }
 }
