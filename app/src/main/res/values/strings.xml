@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">Editor</string>
-    <string name="hello_world" />
+    <string name="effects">Эффекты</string>
+    <string name="rotating">Поворот</string>
+    <string name="scaling">Масштаб</string>
+    <string name="retouch">Ретушь</string>
+    <string name="segmentation">Сегмент</string>
+    <string name="undo">Сброс</string>
+    <string name="save">Сохранить</string>
+
 </resources>

@@ -13,8 +13,6 @@ import kotlin.math.sin
 
 class EditingActivity : AppCompatActivity() {
 
-    private val editableImage: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_editing)
@@ -25,17 +23,19 @@ class EditingActivity : AppCompatActivity() {
         imageView.setImageURI(uri)
 
         rotateButton.setOnClickListener{
-            val width: Int = this.editableImage.getWidth()
-            val height: Int = this.editableImage.getHeight()
+            val editableImage: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
+
+            val width: Int = editableImage.width
+            val height: Int = editableImage.height
             val angle = Math.toRadians(90.0)
             val sin = sin(angle)
             val cos = cos(angle)
             val rotationPoint = 0.5 * (width - 1) // point to rotate about
             val imageCenter = 0.5 * (height - 1) // center of image
             val editedImage = createBitmap(width, height, Bitmap.Config.ALPHA_8)
-//        val pixel = IntArray(3)
+            //val pixel = IntArray(3)
 
-            // rotation
+            //rotation
             for (x in 0 until width) {
                 for (y in 0 until height) {
                     val a = x - rotationPoint
