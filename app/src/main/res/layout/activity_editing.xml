@@ -8,15 +8,96 @@
     tools:context=".EditingActivity">
 
     <!--viewing the image from camera or gallery-->
+
+    <!--saving button-->
+
+    <!--editing button-->
+
+    <!--rotating button-->
+
+    <!--scaling button-->
+
+    <!--retouch button-->
+
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="411dp"
-        android:layout_height="731dp"
+        android:layout_width="413dp"
+        android:layout_height="524dp"
         android:background="#00222222"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.425" />
 
+    <ImageButton
+        android:id="@+id/saveButton"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:backgroundTint="#00FFFFFF"
+        android:tint="#FFFFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.997"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.01"
+        app:srcCompat="@drawable/ic_save" />
+
+    <ImageButton
+        android:id="@+id/editingButton"
+        android:layout_width="66dp"
+        android:layout_height="61dp"
+        android:backgroundTint="#00FFFFFF"
+        android:tint="#FFFFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.931"
+        app:srcCompat="@drawable/ic_editing" />
+
+    <ImageButton
+        android:id="@+id/rotateButton"
+        android:layout_width="64dp"
+        android:layout_height="61dp"
+        android:backgroundTint="#00FFFFFF"
+        android:tint="#FFFFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.216"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.931"
+        app:srcCompat="@drawable/ic_rotate" />
+
+    <ImageButton
+        android:id="@+id/scalingButton"
+        android:layout_width="64dp"
+        android:layout_height="60dp"
+        android:backgroundTint="#00FFFFFF"
+        android:tint="#FFFFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.42"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.929"
+        app:srcCompat="@drawable/ic_scaling" />
+
+    <ImageButton
+        android:id="@+id/retouchButton"
+        android:layout_width="64dp"
+        android:layout_height="63dp"
+        android:backgroundTint="#00FFFFFF"
+        android:tint="#FFFFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.634"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.934"
+        app:srcCompat="@drawable/ic_retouch" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
