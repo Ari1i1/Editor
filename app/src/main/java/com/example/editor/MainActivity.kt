@@ -99,7 +99,7 @@ class MainActivity : AppCompatActivity() {
         //called when user press Allow or Deny
         when (requestCode) {
             PERMISSION_CODE -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //permission from pop-up was granted
                     openCamera()
                     pickImageFromGallery()
@@ -121,7 +121,6 @@ class MainActivity : AppCompatActivity() {
             newActivityIntent.putExtra("imageUri", image_uri.toString())
             startActivity(newActivityIntent)
         }
-
     }
 }
 
