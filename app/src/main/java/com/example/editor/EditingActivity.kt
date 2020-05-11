@@ -10,7 +10,6 @@ import kotlinx.android.synthetic.main.activity_editing.*
 import kotlin.math.cos
 import kotlin.math.sin
 
-
 class EditingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,7 +32,6 @@ class EditingActivity : AppCompatActivity() {
             val rotationPoint = 0.5 * (width - 1) // point to rotate about
             val imageCenter = 0.5 * (height - 1) // center of image
             val editedImage = createBitmap(width, height, Bitmap.Config.ALPHA_8)
-            //val pixel = IntArray(3)
 
             //rotation
             for (x in 0 until width) {
@@ -50,8 +48,6 @@ class EditingActivity : AppCompatActivity() {
             imageView.setImageBitmap(editedImage)
         }
     }
-
-
 }
 
 

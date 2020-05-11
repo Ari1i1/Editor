@@ -4,7 +4,8 @@
     <string name="rotating">Поворот</string>
     <string name="scaling">Масштаб</string>
     <string name="retouch">Ретушь</string>
-    <string name="segmentation">Сегмент</string>
+    <string name="segmentation">Сегмен-тация</string>
+    <string name="filtration">Фильт-рация</string>
     <string name="undo">Сброс</string>
     <string name="save">Сохранить</string>
 

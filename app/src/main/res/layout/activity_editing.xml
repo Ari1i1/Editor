@@ -4,24 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#222222"
+    android:background="@color/colorPrimary"
+    android:theme="@style/AppTheme"
     tools:context=".EditingActivity">
 
-    <!--viewing the image from camera or gallery-->
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="413dp"
-        android:layout_height="524dp"
-        android:background="#00222222"
+        android:layout_width="410dp"
+        android:layout_height="533dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.425" />
-
-    <!--saving button-->
-
-    <!--effects button-->
+        app:layout_constraintVertical_bias="0.454" />
 
     <ImageButton
         android:id="@+id/saveButton"
@@ -31,10 +26,10 @@
         android:tint="#FFFFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.997"
+        app:layout_constraintHorizontal_bias="0.979"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.01"
+        app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/ic_save" />
 
     <ImageButton
@@ -45,13 +40,12 @@
         android:tint="#FFFFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.014"
+        app:layout_constraintHorizontal_bias="0.002"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.931"
-        app:srcCompat="@drawable/ic_editing" />
+        app:layout_constraintVertical_bias="0.941"
+        app:srcCompat="@drawable/ic_effects" />
 
-    <!--rotating button-->
     <ImageButton
         android:id="@+id/rotateButton"
         android:layout_width="64dp"
@@ -63,12 +57,8 @@
         app:layout_constraintHorizontal_bias="0.216"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.931"
+        app:layout_constraintVertical_bias="0.941"
         app:srcCompat="@drawable/ic_rotate" />
-
-    <!--scaling button-->
-
-    <!--retouch button-->
 
     <ImageButton
         android:id="@+id/scalingButton"
@@ -81,7 +71,7 @@
         app:layout_constraintHorizontal_bias="0.42"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.931"
+        app:layout_constraintVertical_bias="0.941"
         app:srcCompat="@drawable/ic_scaling" />
 
     <ImageButton
@@ -95,10 +85,9 @@
         app:layout_constraintHorizontal_bias="0.622"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.931"
+        app:layout_constraintVertical_bias="0.941"
         app:srcCompat="@drawable/ic_retouch" />
 
-    <!--segmentation button-->
     <ImageButton
         android:id="@+id/segmentationButton"
         android:layout_width="61dp"
@@ -110,10 +99,23 @@
         app:layout_constraintHorizontal_bias="0.814"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.931"
+        app:layout_constraintVertical_bias="0.941"
         app:srcCompat="@drawable/ic_segmentation" />
 
-    <!--undo button-->
+    <ImageButton
+        android:id="@+id/filtrationButton"
+        android:layout_width="61dp"
+        android:layout_height="61dp"
+        android:backgroundTint="#00FFFFFF"
+        android:tint="@color/colorAccent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.941"
+        app:srcCompat="@drawable/ic_filtration" />
+
     <ImageButton
         android:id="@+id/undoButton"
         android:layout_width="61dp"
@@ -122,44 +124,44 @@
         android:tint="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.02"
+        app:layout_constraintHorizontal_bias="0.737"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.014"
+        app:layout_constraintVertical_bias="0.004"
         app:srcCompat="@drawable/ic_undo" />
 
     <TextView
-        android:id="@+id/effects"
+        android:id="@+id/effectsText"
         android:layout_width="66dp"
         android:layout_height="wrap_content"
         android:text="@string/effects"
+        android:textAlignment="center"
         android:textColor="@color/colorAccent"
         android:textSize="13sp"
-        android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.014"
+        app:layout_constraintHorizontal_bias="0.002"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/effectsButton"
-        app:layout_constraintVertical_bias="0.178" />
+        app:layout_constraintVertical_bias="0.238" />
 
     <TextView
-        android:id="@+id/rotating"
+        android:id="@+id/rotatingText"
         android:layout_width="64dp"
         android:layout_height="wrap_content"
         android:text="@string/rotating"
+        android:textAlignment="center"
         android:textColor="@color/colorAccent"
         android:textSize="13sp"
-        android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.204"
-        app:layout_constraintStart_toStartOf="@+id/effects"
+        app:layout_constraintHorizontal_bias="0.216"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/rotateButton"
-        app:layout_constraintVertical_bias="0.178" />
+        app:layout_constraintVertical_bias="0.238" />
 
     <TextView
-        android:id="@+id/scaling"
+        android:id="@+id/scalingText"
         android:layout_width="64dp"
         android:layout_height="wrap_content"
         android:text="@string/scaling"
@@ -171,64 +173,80 @@
         app:layout_constraintHorizontal_bias="0.42"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/scalingButton"
-        app:layout_constraintVertical_bias="0.178" />
+        app:layout_constraintVertical_bias="0.238" />
 
     <TextView
-        android:id="@+id/retouch"
+        android:id="@+id/retouchText"
         android:layout_width="61dp"
         android:layout_height="wrap_content"
         android:text="@string/retouch"
+        android:textAlignment="center"
         android:textColor="@color/colorAccent"
         android:textSize="13sp"
-        android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.622"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/retouchButton"
-        app:layout_constraintVertical_bias="0.178" />
+        app:layout_constraintVertical_bias="0.238" />
 
     <TextView
-        android:id="@+id/segmentation"
+        android:id="@+id/segmentationText"
         android:layout_width="61dp"
-        android:layout_height="wrap_content"
+        android:layout_height="31dp"
         android:text="@string/segmentation"
+        android:textAlignment="center"
         android:textColor="@color/colorAccent"
         android:textSize="13sp"
-        android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.814"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/segmentationButton"
-        app:layout_constraintVertical_bias="0.178" />
+        app:layout_constraintVertical_bias="0.238" />
 
     <TextView
-        android:id="@+id/save"
+        android:id="@+id/filtrationText"
+        android:layout_width="61dp"
+        android:layout_height="31dp"
+        android:text="@string/filtration"
+        android:textAlignment="center"
+        android:textColor="@color/colorAccent"
+        android:textSize="13sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/filtrationButton"
+        app:layout_constraintVertical_bias="0.25" />
+
+    <TextView
+        android:id="@+id/saveText"
         android:layout_width="75dp"
         android:layout_height="wrap_content"
         android:text="@string/save"
+        android:textAlignment="center"
         android:textColor="@color/colorAccent"
         android:textSize="13sp"
-        android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.997"
+        app:layout_constraintHorizontal_bias="0.979"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/saveButton"
         app:layout_constraintVertical_bias="0.0" />
 
     <TextView
-        android:id="@+id/undo"
+        android:id="@+id/undoText"
         android:layout_width="61dp"
         android:layout_height="wrap_content"
         android:text="@string/undo"
+        android:textAlignment="center"
         android:textColor="@color/colorAccent"
         android:textSize="13sp"
-        android:textAlignment="center"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.02"
+        app:layout_constraintHorizontal_bias="0.737"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/undoButton"
         app:layout_constraintVertical_bias="0.0" />
