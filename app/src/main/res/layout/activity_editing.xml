@@ -19,19 +19,6 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.454" />
 
-    <ImageButton
-        android:id="@+id/saveButton"
-        android:layout_width="75dp"
-        android:layout_height="64dp"
-        android:backgroundTint="#00FFFFFF"
-        android:tint="#FFFFFFFF"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.979"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
-        app:srcCompat="@drawable/ic_save" />
 
     <ImageButton
         android:id="@+id/effectsButton"
@@ -44,7 +31,7 @@
         app:layout_constraintHorizontal_bias="0.002"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.941"
+        app:layout_constraintVertical_bias="0.929"
         app:srcCompat="@drawable/ic_effects" />
 
     <ImageButton
@@ -58,7 +45,7 @@
         app:layout_constraintHorizontal_bias="0.216"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.941"
+        app:layout_constraintVertical_bias="0.929"
         app:srcCompat="@drawable/ic_rotate" />
 
     <ImageButton
@@ -72,7 +59,7 @@
         app:layout_constraintHorizontal_bias="0.42"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.941"
+        app:layout_constraintVertical_bias="0.929"
         app:srcCompat="@drawable/ic_scaling" />
 
     <ImageButton
@@ -86,7 +73,7 @@
         app:layout_constraintHorizontal_bias="0.622"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.941"
+        app:layout_constraintVertical_bias="0.929"
         app:srcCompat="@drawable/ic_retouch" />
 
     <ImageButton
@@ -100,7 +87,7 @@
         app:layout_constraintHorizontal_bias="0.814"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.941"
+        app:layout_constraintVertical_bias="0.929"
         app:srcCompat="@drawable/ic_segmentation" />
 
     <ImageButton
@@ -114,21 +101,35 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.941"
+        app:layout_constraintVertical_bias="0.929"
         app:srcCompat="@drawable/ic_filtration" />
 
     <ImageButton
+        android:id="@+id/saveButton"
+        android:layout_width="72dp"
+        android:layout_height="55dp"
+        android:backgroundTint="#00FFFFFF"
+        android:tint="#FFFFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.971"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/ic_save" />
+
+    <ImageButton
         android:id="@+id/undoButton"
-        android:layout_width="61dp"
-        android:layout_height="61dp"
+        android:layout_width="60dp"
+        android:layout_height="55dp"
         android:backgroundTint="#00FFFFFF"
         android:tint="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.737"
+        app:layout_constraintHorizontal_bias="0.735"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.004"
+        app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/ic_undo" />
 
     <TextView
@@ -223,7 +224,7 @@
 
     <TextView
         android:id="@+id/saveText"
-        android:layout_width="75dp"
+        android:layout_width="72dp"
         android:layout_height="wrap_content"
         android:text="@string/save"
         android:textAlignment="center"
@@ -231,14 +232,14 @@
         android:textSize="13sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.979"
+        app:layout_constraintHorizontal_bias="0.97"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/saveButton"
         app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/undoText"
-        android:layout_width="61dp"
+        android:layout_width="60dp"
         android:layout_height="wrap_content"
         android:text="@string/undo"
         android:textAlignment="center"
@@ -247,7 +248,7 @@
 
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.737"
+        app:layout_constraintHorizontal_bias="0.735"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/undoButton"
         app:layout_constraintVertical_bias="0.0" />

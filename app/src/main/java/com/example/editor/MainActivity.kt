@@ -14,7 +14,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    private val PERMISSION_CODE = 1000
+    private val PERMISSION_CODE_CAMERA = 999
+    private val PERMISSION_CODE_GALLERY = 1000
     private val IMAGE_CAPTURE_CODE = 1001
     private val IMAGE_PICK_CODE = 1001
     var image_uri: Uri? = null
@@ -37,7 +38,7 @@ class MainActivity : AppCompatActivity() {
                         android.Manifest.permission.WRITE_EXTERNAL_STORAGE
                     )
                     //show pop-up to request permission
-                    requestPermissions(permission, PERMISSION_CODE)
+                    requestPermissions(permission, PERMISSION_CODE_CAMERA)
                 } else {
                     //permission was granted
                     openCamera()
@@ -58,7 +59,7 @@ class MainActivity : AppCompatActivity() {
                     //permission denied
                     val permissions = arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE);
                     //show popup to request runtime permission
-                    requestPermissions(permissions, PERMISSION_CODE);
+                    requestPermissions(permissions, PERMISSION_CODE_GALLERY);
                 }
                 else{
                     //permission already granted
@@ -98,10 +99,19 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         //called when user press Allow or Deny
         when (requestCode) {
-            PERMISSION_CODE -> {
+            PERMISSION_CODE_CAMERA -> {
                 if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //permission from pop-up was granted
                     openCamera()
+                }
+                else {
+                    //permission from pop-up was denied
+                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
+                }
+            }
+            PERMISSION_CODE_GALLERY -> {
+                if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //permission from pop-up was granted
                     pickImageFromGallery()
                 }
                 else {
