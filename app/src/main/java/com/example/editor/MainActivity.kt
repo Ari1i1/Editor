@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
     private val PERMISSION_CODE_CAMERA = 999
     private val PERMISSION_CODE_GALLERY = 1000
     private val IMAGE_CAPTURE_CODE = 1001
-    private val IMAGE_PICK_CODE = 1001
+    private val IMAGE_PICK_CODE = 1002
     var image_uri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,17 +78,14 @@ class MainActivity : AppCompatActivity() {
         values.put(MediaStore.Images.Media.TITLE, "New picture")
         values.put(MediaStore.Images.Media.DESCRIPTION, "From the Camera")
         image_uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-        //camera
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, image_uri)
         startActivityForResult(cameraIntent, IMAGE_CAPTURE_CODE)
     }
 
     private fun pickImageFromGallery() {
-        //Intent to pick image
-        val intent = Intent(Intent.ACTION_PICK)
-        intent.type = "image/*"
-        startActivityForResult(intent, IMAGE_PICK_CODE)
+        val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        startActivityForResult(galleryIntent, IMAGE_PICK_CODE)
     }
 
     override fun onRequestPermissionsResult(
@@ -125,8 +122,14 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         //called when image was captured from camera intent
-        if (resultCode == Activity.RESULT_OK) {
+        if (resultCode == Activity.RESULT_OK && requestCode == IMAGE_CAPTURE_CODE) {
             //creating and opening a new activity
+            val newActivityIntent = Intent(this, EditingActivity::class.java)
+            newActivityIntent.putExtra("imageUri", image_uri.toString())
+            startActivity(newActivityIntent)
+        }
+        else if (resultCode == Activity.RESULT_OK && requestCode == IMAGE_PICK_CODE) {
+            image_uri = data?.data
             val newActivityIntent = Intent(this, EditingActivity::class.java)
             newActivityIntent.putExtra("imageUri", image_uri.toString())
             startActivity(newActivityIntent)
