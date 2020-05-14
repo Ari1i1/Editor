@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //if the camera button is clicked
+        //нажатие кнопки камеры
         cameraButton.setOnClickListener {
             //if android version is Marshmallow and above
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -50,29 +50,29 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        //if the gallery button is clicked
+        //нажатие кнопки галереи
         galleryButton.setOnClickListener {
             //check runtime permission
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                 if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) ==
                     PackageManager.PERMISSION_DENIED){
-                    //permission denied
+                    //запрос отклонен
                     val permissions = arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE);
-                    //show popup to request runtime permission
                     requestPermissions(permissions, PERMISSION_CODE_GALLERY);
                 }
                 else{
-                    //permission already granted
+                    //запрос уже принят
                     pickImageFromGallery();
                 }
             }
             else{
-                //system OS is < Marshmallow
+                //OС меньше Marshmallow
                 pickImageFromGallery();
             }
         }
     }
 
+    //вызов камеры
     private fun openCamera(){
         val values = ContentValues()
         values.put(MediaStore.Images.Media.TITLE, "New picture")
@@ -83,6 +83,7 @@ class MainActivity : AppCompatActivity() {
         startActivityForResult(cameraIntent, IMAGE_CAPTURE_CODE)
     }
 
+    //вызов галереи
     private fun pickImageFromGallery() {
         val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         startActivityForResult(galleryIntent, IMAGE_PICK_CODE)
@@ -94,26 +95,26 @@ class MainActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        //called when user press Allow or Deny
+        //вызывается, когда пользователь принимает/отклоняет запрос
         when (requestCode) {
             PERMISSION_CODE_CAMERA -> {
                 if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //permission from pop-up was granted
+                    //запрос принят
                     openCamera()
                 }
                 else {
-                    //permission from pop-up was denied
-                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
+                    //запрос отклонен
+                    Toast.makeText(this, "Запрос отклонен", Toast.LENGTH_SHORT).show()
                 }
             }
             PERMISSION_CODE_GALLERY -> {
                 if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //permission from pop-up was granted
+                    //запрос принят
                     pickImageFromGallery()
                 }
                 else {
-                    //permission from pop-up was denied
-                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
+                    //запрос отклонен
+                    Toast.makeText(this, "Запрос отклонен", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -121,9 +122,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        //called when image was captured from camera intent
+        //вызывается, когда фото захвачено с камеры/взято из галереи
         if (resultCode == Activity.RESULT_OK && requestCode == IMAGE_CAPTURE_CODE) {
-            //creating and opening a new activity
+            //создание нового активити и переход к нему
             val newActivityIntent = Intent(this, EditingActivity::class.java)
             newActivityIntent.putExtra("imageUri", image_uri.toString())
             startActivity(newActivityIntent)
