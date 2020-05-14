@@ -1,12 +1,17 @@
 package com.example.editor
 
 import android.graphics.Bitmap
-import android.graphics.Bitmap.createBitmap
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.text.format.Time
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_editing.*
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStream
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -23,7 +28,9 @@ class EditingActivity : AppCompatActivity() {
 
         val uri = Uri.parse(uriString)
         imageView.setImageURI(uri)
+        var finalImage: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
 
+        //поворот изображения
         rotateButton.setOnClickListener{
             val width: Int = this.editableImage.getWidth()
             val height: Int = this.editableImage.getHeight()
@@ -48,6 +55,32 @@ class EditingActivity : AppCompatActivity() {
                 }
             }
             imageView.setImageBitmap(editedImage)
+            finalImage = editedImage
+        }
+
+        //сохранение изображения
+        saveButton.setOnClickListener{
+            val time = Time()
+            time.setToNow()
+            val externalStorageState = Environment.getExternalStorageState()
+            if (externalStorageState.equals(Environment.MEDIA_MOUNTED)) {
+                val storageDirectory = Environment.getExternalStorageDirectory().toString()
+                val file = File(storageDirectory, "new_image" + time.year.toString() + (time.month + 1).toString() +
+                        time.monthDay.toString() + time.hour.toString() + time.minute.toString() +
+                        time.second.toString() + ".jpg")
+                try {
+                    val stream: OutputStream = FileOutputStream(file)
+                    finalImage.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+                    stream.flush()
+                    stream.close()
+                    Toast.makeText(this, "Изображение успешно сохранено", Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            else {
+                Toast.makeText(this, "Не удалось получить доступ к памяти", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
