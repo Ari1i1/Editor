@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Editor</string>
+    <string name="app_name">Afterglow</string>
     <string name="effects">Эффекты</string>
     <string name="rotating">Поворот</string>
     <string name="scaling">Масштаб</string>

@@ -8,24 +8,24 @@
     android:theme="@style/AppTheme"
     tools:context=".EditingActivity">
 
+
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="fill_parent"
-        android:layout_height="533dp"
+        android:layout_height="400dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.454" />
-
+        app:layout_constraintVertical_bias="0.434" />
 
     <ImageButton
         android:id="@+id/effectsButton"
         android:layout_width="66dp"
         android:layout_height="61dp"
         android:backgroundTint="#00FFFFFF"
-        android:tint="#FFFFFFFF"
+        android:tint="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.002"
@@ -39,7 +39,7 @@
         android:layout_width="64dp"
         android:layout_height="61dp"
         android:backgroundTint="#00FFFFFF"
-        android:tint="#FFFFFFFF"
+        android:tint="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.216"
@@ -109,7 +109,7 @@
         android:layout_width="72dp"
         android:layout_height="55dp"
         android:backgroundTint="#00FFFFFF"
-        android:tint="#FFFFFFFF"
+        android:tint="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.971"
