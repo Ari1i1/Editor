@@ -12,13 +12,12 @@
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="fill_parent"
-        android:layout_height="400dp"
+        android:layout_height="430dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.434" />
+        app:layout_constraintVertical_bias="0.454" />
 
     <ImageButton
         android:id="@+id/effectsButton"
@@ -31,7 +30,7 @@
         app:layout_constraintHorizontal_bias="0.002"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.929"
+        app:layout_constraintVertical_bias="0.94"
         app:srcCompat="@drawable/ic_effects" />
 
     <ImageButton
@@ -45,7 +44,7 @@
         app:layout_constraintHorizontal_bias="0.216"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.929"
+        app:layout_constraintVertical_bias="0.94"
         app:srcCompat="@drawable/ic_rotate" />
 
     <ImageButton
@@ -59,7 +58,7 @@
         app:layout_constraintHorizontal_bias="0.42"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.929"
+        app:layout_constraintVertical_bias="0.938"
         app:srcCompat="@drawable/ic_scaling" />
 
     <ImageButton
@@ -73,7 +72,7 @@
         app:layout_constraintHorizontal_bias="0.622"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.929"
+        app:layout_constraintVertical_bias="0.94"
         app:srcCompat="@drawable/ic_retouch" />
 
     <ImageButton
@@ -87,7 +86,7 @@
         app:layout_constraintHorizontal_bias="0.814"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.929"
+        app:layout_constraintVertical_bias="0.94"
         app:srcCompat="@drawable/ic_segmentation" />
 
     <ImageButton
@@ -101,7 +100,7 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.929"
+        app:layout_constraintVertical_bias="0.94"
         app:srcCompat="@drawable/ic_filtration" />
 
     <ImageButton
@@ -145,10 +144,10 @@
         app:layout_constraintHorizontal_bias="0.002"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/effectsButton"
-        app:layout_constraintVertical_bias="0.238" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
-        android:id="@+id/rotatingText"
+        android:id="@+id/rotateText"
         android:layout_width="64dp"
         android:layout_height="wrap_content"
         android:text="@string/rotating"
@@ -160,7 +159,7 @@
         app:layout_constraintHorizontal_bias="0.216"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/rotateButton"
-        app:layout_constraintVertical_bias="0.238" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/scalingText"
@@ -175,7 +174,7 @@
         app:layout_constraintHorizontal_bias="0.42"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/scalingButton"
-        app:layout_constraintVertical_bias="0.238" />
+        app:layout_constraintVertical_bias="0.043" />
 
     <TextView
         android:id="@+id/retouchText"
@@ -190,7 +189,7 @@
         app:layout_constraintHorizontal_bias="0.622"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/retouchButton"
-        app:layout_constraintVertical_bias="0.238" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/segmentationText"
@@ -205,7 +204,7 @@
         app:layout_constraintHorizontal_bias="0.814"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/segmentationButton"
-        app:layout_constraintVertical_bias="0.238" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/filtrationText"
@@ -220,7 +219,7 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/filtrationButton"
-        app:layout_constraintVertical_bias="0.25" />
+        app:layout_constraintVertical_bias="0.0" />
 
     <TextView
         android:id="@+id/saveText"
@@ -252,5 +251,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/undoButton"
         app:layout_constraintVertical_bias="0.0" />
+
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:progress="0"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.894" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

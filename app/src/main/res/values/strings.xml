@@ -8,5 +8,7 @@
     <string name="filtration">Фильт-рация</string>
     <string name="undo">Сброс</string>
     <string name="save">Сохранить</string>
+    <string name="nameEffect1">Эффект 1</string>
+    <string name="nameEffect2">Эффект 2</string>
 
 </resources>
