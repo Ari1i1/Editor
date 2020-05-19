@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/effect1"
+        android:title="@string/nameEffect1"
+        android:layout_height="wrap_content"/>
+    <item
+        android:id="@+id/effect2"
+        android:title="@string/nameEffect2"
+        android:layout_height="wrap_content" />
+</menu>
