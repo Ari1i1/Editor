@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Editor</string>
+    <string name="app_name">Afterglow</string>
     <string name="effects">Эффекты</string>
     <string name="rotating">Поворот</string>
     <string name="scaling">Масштаб</string>
@@ -8,5 +8,9 @@
     <string name="filtration">Фильт-рация</string>
     <string name="undo">Сброс</string>
     <string name="save">Сохранить</string>
+    <string name="nameEffect1">Эффект 1</string>
+    <string name="nameEffect2">Эффект 2</string>
+    <string name="nameEffect3">Эффект 3</string>
+    <string name="nameEffect4">Случайный эффект</string>
 
 </resources>
