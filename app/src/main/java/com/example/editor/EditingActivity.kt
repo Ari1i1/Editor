@@ -10,14 +10,14 @@ import android.text.format.Time
 import android.view.View
 import android.widget.PopupMenu
 import android.widget.SeekBar
-import android.widget.SeekBar.OnSeekBarChangeListener
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_editing.*
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
-import kotlin.math.*
+import kotlin.math.cos
+import kotlin.math.sin
 
 
 class EditingActivity : AppCompatActivity() {
@@ -122,6 +122,7 @@ class EditingActivity : AppCompatActivity() {
         undoText.visibility = View.VISIBLE
     }
 
+    //поворот изображения
     private fun rotate() {
         seekBarVisible()
         seekBar.max = 0
@@ -143,8 +144,7 @@ class EditingActivity : AppCompatActivity() {
             }
         })
     }
-
-    //поворот изображения
+    //алгоритм поворота
     private fun rotation(angleStart: Int, Image: Bitmap) : Bitmap {
         val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
         val width: Int = image.width
@@ -209,23 +209,126 @@ class EditingActivity : AppCompatActivity() {
 
     //эффекты
     private fun effects() {
-        var mainImage: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
         val menu = PopupMenu(this, effectsButton)
         menu.inflate(R.menu.effects_menu)
-
-        val width = mainImage.width
-        val height = mainImage.height
 
         menu.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.effect1 -> {
-                    //тело эффекта
+                    //неоновый розовый
+                    val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
+                    val width = image.width
+                    val height = image.height
+
+                    val editedImage = Bitmap.createBitmap(width, height, image.config)
+
+                    for (x in 0 until width) {
+                        for (y in 0 until height) {
+                            val pixelColor = image.getPixel(x, y)
+                            val pixelAlpha = Color.alpha(pixelColor)
+                            val pixelRed = Color.red(pixelColor)
+                            val pixelGreen = Color.green(pixelColor)
+                            val pixelBlue = Color.blue(pixelColor)
+
+                            editedImage.setPixel(x, y, Color.argb(pixelAlpha, pixelBlue, pixelRed/2, pixelGreen))
+                        }
+                    }
+                    imageView.setImageBitmap(editedImage)
+
                     Toast.makeText(this, "Применен эффект 1", Toast.LENGTH_SHORT).show()
                     true
                 }
+                //розовый
                 R.id.effect2 -> {
-                    //тело эффекта
+                    val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
+                    val width = image.width
+                    val height = image.height
+
+                    val editedImage = Bitmap.createBitmap(width, height, image.config)
+
+                    for (x in 0 until width) {
+                        for (y in 0 until height) {
+                            val pixelColor = image.getPixel(x, y)
+                            var pixelAlpha = Color.alpha(pixelColor)
+                            var pixelRed = Color.red(pixelColor)
+                            var pixelGreen = Color.green(pixelColor)
+                            var pixelBlue = Color.blue(pixelColor)
+
+                            if (pixelAlpha >= 10) {
+                                pixelAlpha -= 10
+                            }
+                            if (pixelRed <= 200) {
+                                pixelRed += 10
+                            }
+                            if (pixelGreen >= 20) {
+                                pixelGreen -= 20
+                            }
+                            if (pixelBlue <= 200) {
+                                pixelBlue += 10
+                            }
+
+                            editedImage.setPixel(x, y, Color.argb(pixelAlpha, pixelRed,
+                                pixelGreen, pixelBlue))
+                        }
+                    }
+                    imageView.setImageBitmap(editedImage)
+
                     Toast.makeText(this, "Применен эффект 2", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                //черно-белый
+                R.id.effect3 -> {
+                    val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
+                    val width = image.width
+                    val height = image.height
+
+                    val editedImage = Bitmap.createBitmap(width, height, image.config)
+
+                    for (x in 0 until width) {
+                        for (y in 0 until height) {
+                            val pixelColor = image.getPixel(x, y)
+                            val pixelAlpha = Color.alpha(pixelColor)
+                            val pixelRed = Color.red(pixelColor)
+                            val pixelGreen = Color.green(pixelColor)
+                            val pixelBlue = Color.blue(pixelColor)
+
+                            val grey = (pixelRed + pixelGreen + pixelBlue)/3
+
+                            editedImage.setPixel(x, y, Color.argb(pixelAlpha, grey, grey, grey))
+                        }
+                    }
+                    imageView.setImageBitmap(editedImage)
+
+                    Toast.makeText(this, "Применен эффект 3", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                //случайный эффект
+                R.id.effect4 -> {
+                    val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
+                    val width = image.width
+                    val height = image.height
+
+                    val editedImage = Bitmap.createBitmap(width, height, image.config)
+
+                    for (x in 0 until width) {
+                        for (y in 0 until height) {
+                            val pixelColor = image.getPixel(x, y)
+                            val pixelAlpha = Color.alpha(pixelColor)
+                            val pixelRed = Color.red(pixelColor)
+                            val pixelGreen = Color.green(pixelColor)
+                            val pixelBlue = Color.blue(pixelColor)
+
+                            val rand1 = (-50..50).random()
+                            val rand2 = (-50..50).random()
+                            val rand3 = (-50..50).random()
+
+                            editedImage.setPixel(x, y, Color.argb(pixelAlpha, pixelRed + rand1,
+                                pixelGreen + rand2, pixelBlue + rand3))
+                        }
+                    }
+                    imageView.setImageBitmap(editedImage)
+
+                    Toast.makeText(this, "Применен случайны эффект", Toast.LENGTH_SHORT).show()
                     true
                 }
                 else -> false

@@ -8,4 +8,12 @@
         android:id="@+id/effect2"
         android:title="@string/nameEffect2"
         android:layout_height="wrap_content" />
+    <item
+        android:id="@+id/effect3"
+        android:title="@string/nameEffect3"
+        android:layout_height="wrap_content" />
+    <item
+        android:id="@+id/effect4"
+        android:title="@string/nameEffect4"
+        android:layout_height="wrap_content" />
 </menu>
