@@ -73,6 +73,13 @@ class EditingActivity : AppCompatActivity() {
         scalingText.setOnClickListener {
             scaling()
         }
+
+        retouchButton.setOnClickListener {
+            retouch()
+        }
+        retouchText.setOnClickListener {
+            retouch()
+        }
     }
 
     //ползунок + изменение активности нижних кнопок
@@ -154,7 +161,7 @@ class EditingActivity : AppCompatActivity() {
         val cos = cos(angle)
         val midX = 0.5 * (width - 1) // point to rotate about
         val midY = 0.5 * (height - 1) // center of image
-        val editedImage = Bitmap.createBitmap(height, width, image.config)
+        val rotatedImage = Bitmap.createBitmap(height, width, image.config)
 
         for (x in 0 until height) {
             for (y in 0 until width) {
@@ -163,14 +170,14 @@ class EditingActivity : AppCompatActivity() {
                 val xx = (+a * cos - b * sin + midX).toInt()
                 val yy = (+a * sin + b * cos + midY).toInt()
                 if (xx in 0 until width && yy >= 0 && yy < height) {
-                    editedImage.setPixel(x, y, image.getPixel(xx, yy))
+                    rotatedImage.setPixel(x, y, image.getPixel(xx, yy))
                 }
                 else {
-                    editedImage.setPixel(x, y, Color.argb(100, 0, 0, 0))
+                    rotatedImage.setPixel(x, y, Color.argb(100, 0, 0, 0))
                 }
             }
         }
-        return editedImage
+        return rotatedImage
     }
 
     //сохранение изображения
@@ -336,12 +343,51 @@ class EditingActivity : AppCompatActivity() {
         menu.show()
     }
 
+
     //масштабирование
     private fun scaling(){
         seekBarVisible()
         //алгоритм
+        val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
+        val width = image.width
+        val height = image.height
+
         seekBarInvisible()
         Toast.makeText(this, "Выполнено масштабирование", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun retouch(){
+        val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
+        var pixelAlpha: Int = 0
+        var pixelRed: Int = 0
+        var pixelGreen: Int = 0
+        var pixelBlue: Int = 0
+        var pixelColor: Int
+        val width = image.width
+        val height = image.height
+        val editedImage = Bitmap.createBitmap(width, height, image.config)
+        val size = width * height
+        for (x in 0 until width) {
+            for (y in 0 until height) {
+                pixelColor = image.getPixel(x, y)
+                pixelAlpha += Color.alpha(pixelColor)
+                pixelRed += Color.red(pixelColor)
+                pixelGreen += Color.green(pixelColor)
+                pixelBlue += Color.blue(pixelColor)
+            }
+        }
+        pixelAlpha /= size
+        pixelRed /= size
+        pixelGreen /= size
+        pixelBlue /= size
+        for (x in 0 until width) {
+            for (y in 0 until height) {
+                editedImage.setPixel(x, y, Color.argb(pixelAlpha, pixelRed, pixelGreen, pixelBlue))
+            }
+        }
+        imageView.setImageBitmap(editedImage)
+        Toast.makeText(this, "Выполнена ретушь", Toast.LENGTH_SHORT).show()
+        true
     }
 }
 
