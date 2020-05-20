@@ -215,7 +215,7 @@ class EditingActivity : AppCompatActivity() {
         menu.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.effect1 -> {
-                    //неоновый розовый
+                    //розовый неон
                     val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
                     val height = image.height
@@ -235,7 +235,7 @@ class EditingActivity : AppCompatActivity() {
                     }
                     imageView.setImageBitmap(editedImage)
 
-                    Toast.makeText(this, "Применен эффект 1", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Применен эффект Розовый неон", Toast.LENGTH_SHORT).show()
                     true
                 }
                 //розовый
@@ -257,11 +257,8 @@ class EditingActivity : AppCompatActivity() {
                             if (pixelAlpha >= 10) {
                                 pixelAlpha -= 10
                             }
-                            if (pixelRed <= 200) {
-                                pixelRed += 10
-                            }
-                            if (pixelGreen >= 20) {
-                                pixelGreen -= 20
+                            if (pixelGreen >= 10) {
+                                pixelGreen -= 10
                             }
                             if (pixelBlue <= 200) {
                                 pixelBlue += 10
@@ -273,10 +270,10 @@ class EditingActivity : AppCompatActivity() {
                     }
                     imageView.setImageBitmap(editedImage)
 
-                    Toast.makeText(this, "Применен эффект 2", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Применен эффект Розовый", Toast.LENGTH_SHORT).show()
                     true
                 }
-                //черно-белый
+                //черно-белый 1
                 R.id.effect3 -> {
                     val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
@@ -299,10 +296,10 @@ class EditingActivity : AppCompatActivity() {
                     }
                     imageView.setImageBitmap(editedImage)
 
-                    Toast.makeText(this, "Применен эффект 3", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Применен эффект Черно-белый 1", Toast.LENGTH_SHORT).show()
                     true
                 }
-                //случайный эффект
+                //черно-белый 2
                 R.id.effect4 -> {
                     val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
@@ -318,17 +315,19 @@ class EditingActivity : AppCompatActivity() {
                             val pixelGreen = Color.green(pixelColor)
                             val pixelBlue = Color.blue(pixelColor)
 
-                            val rand1 = (-50..50).random()
-                            val rand2 = (-50..50).random()
-                            val rand3 = (-50..50).random()
+                            var mid = (pixelRed + pixelGreen + pixelBlue)/3
 
-                            editedImage.setPixel(x, y, Color.argb(pixelAlpha, pixelRed + rand1,
-                                pixelGreen + rand2, pixelBlue + rand3))
+                            if (mid in 0..115) { mid = 0 }
+                            else if (mid in 116..149) { mid = 134 }
+                            else if (mid in 155..255) { mid= 255 }
+
+                            editedImage.setPixel(x, y, Color.argb(pixelAlpha, mid,
+                                mid, mid))
                         }
                     }
                     imageView.setImageBitmap(editedImage)
 
-                    Toast.makeText(this, "Применен случайны эффект", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Применен эффект Черно-белый 2", Toast.LENGTH_SHORT).show()
                     true
                 }
                 else -> false
