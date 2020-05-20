@@ -8,9 +8,9 @@
     <string name="filtration">Фильт-рация</string>
     <string name="undo">Сброс</string>
     <string name="save">Сохранить</string>
-    <string name="nameEffect1">Эффект 1</string>
-    <string name="nameEffect2">Эффект 2</string>
-    <string name="nameEffect3">Эффект 3</string>
-    <string name="nameEffect4">Случайный эффект</string>
+    <string name="nameEffect1">Розовый неон</string>
+    <string name="nameEffect2">Розовый</string>
+    <string name="nameEffect3">Черно-белый 1</string>
+    <string name="nameEffect4">Черно-белый 2</string>
 
 </resources>
