@@ -28,7 +28,7 @@ class EditingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_editing)
 
-        val uriString:String? = intent.getStringExtra("imageUri")
+        val uriString: String? = intent.getStringExtra("imageUri")
         val uri = Uri.parse(uriString)
         imageView.setImageURI(uri)
         val startImage: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
@@ -90,6 +90,7 @@ class EditingActivity : AppCompatActivity() {
         seekBar.visibility = View.VISIBLE
         degrees.visibility = View.VISIBLE
     }
+
     private fun buttonsInvisible() {
         effectsButton.visibility = View.GONE
         rotateButton.visibility = View.GONE
@@ -109,10 +110,12 @@ class EditingActivity : AppCompatActivity() {
         saveText.visibility = View.GONE
         undoText.visibility = View.GONE
     }
+
     private fun seekBarInvisible() {
         seekBar.visibility = View.GONE
         degrees.visibility = View.GONE
     }
+
     private fun buttonsVisible() {
         effectsButton.visibility = View.VISIBLE
         rotateButton.visibility = View.VISIBLE
@@ -132,9 +135,11 @@ class EditingActivity : AppCompatActivity() {
         saveText.visibility = View.VISIBLE
         undoText.visibility = View.VISIBLE
     }
+
     private fun progressBarVisible() {
         progressBar.visibility = View.VISIBLE
     }
+
     private fun progressBarInvisible() {
         progressBar.visibility = View.GONE
     }
@@ -148,11 +153,13 @@ class EditingActivity : AppCompatActivity() {
         seekBar.progress = 180
 
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seek: SeekBar, progess: Int , fromUser: Boolean) {
-                degrees.text = (seek.progress-180).toString() + "°"
+            override fun onProgressChanged(seek: SeekBar, progess: Int, fromUser: Boolean) {
+                degrees.text = (seek.progress - 180).toString() + "°"
             }
+
             override fun onStartTrackingTouch(seek: SeekBar) {
             }
+
             override fun onStopTrackingTouch(seek: SeekBar) {
                 progressBarVisible()
                 val image = (imageView.drawable as BitmapDrawable).bitmap
@@ -166,14 +173,19 @@ class EditingActivity : AppCompatActivity() {
                         progressBarInvisible()
                         seekBarInvisible()
                         buttonsVisible()
-                        Toast.makeText(this@EditingActivity, "Выполнен поворот на " + (seek.progress-180) + "°", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@EditingActivity,
+                            "Выполнен поворот на " + (seek.progress - 180) + "°",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
         })
     }
+
     //алгоритм поворота
-    private fun rotation(angleStart: Int, Image: Bitmap) : Bitmap {
+    private fun rotation(angleStart: Int, Image: Bitmap): Bitmap {
         val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
         val width: Int = image.width
         val height: Int = image.height
@@ -192,8 +204,7 @@ class EditingActivity : AppCompatActivity() {
                 val yy = (+a * sin + b * cos + midY).toInt()
                 if (xx in 0 until width && yy >= 0 && yy < height) {
                     rotatedImage.setPixel(x, y, image.getPixel(xx, yy))
-                }
-                else {
+                } else {
                     rotatedImage.setPixel(x, y, Color.argb(100, 0, 0, 0))
                 }
             }
@@ -213,7 +224,8 @@ class EditingActivity : AppCompatActivity() {
             if (externalStorageState.equals(Environment.MEDIA_MOUNTED)) {
                 val storageDirectory = Environment.getExternalStorageDirectory().toString()
                 val file = File(
-                    storageDirectory, "new_image" + time.year.toString() + (time.month + 1).toString() +
+                    storageDirectory,
+                    "new_image" + time.year.toString() + (time.month + 1).toString() +
                             time.monthDay.toString() + time.hour.toString() + time.minute.toString() +
                             time.second.toString() + ".jpg"
                 )
@@ -233,10 +245,17 @@ class EditingActivity : AppCompatActivity() {
             uiThread {
                 progressBarInvisible()
                 if (temp == 1) {
-                    Toast.makeText(this@EditingActivity, "Изображение успешно сохранено", Toast.LENGTH_SHORT).show()
-                }
-                else {
-                    Toast.makeText(this@EditingActivity, "Не удалось получить доступ к памяти", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this@EditingActivity,
+                        "Изображение успешно сохранено",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    Toast.makeText(
+                        this@EditingActivity,
+                        "Не удалось получить доступ к памяти",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
@@ -274,14 +293,22 @@ class EditingActivity : AppCompatActivity() {
                                 val pixelGreen = Color.green(pixelColor)
                                 val pixelBlue = Color.blue(pixelColor)
 
-                                editedImage.setPixel(x, y, Color.argb(pixelAlpha, pixelBlue, pixelRed/2, pixelGreen))
+                                editedImage.setPixel(
+                                    x,
+                                    y,
+                                    Color.argb(pixelAlpha, pixelBlue, pixelRed / 2, pixelGreen)
+                                )
                             }
                         }
                         uiThread {
                             imageView.setImageBitmap(editedImage)
                             progressBarInvisible()
                             buttonsVisible()
-                            Toast.makeText(this@EditingActivity, "Применен эффект Розовый неон", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@EditingActivity,
+                                "Применен эффект Розовый неон",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                     buttonsVisible()
@@ -315,15 +342,23 @@ class EditingActivity : AppCompatActivity() {
                                     pixelBlue += 10
                                 }
 
-                                editedImage.setPixel(x, y, Color.argb(pixelAlpha, pixelRed,
-                                    pixelGreen, pixelBlue))
+                                editedImage.setPixel(
+                                    x, y, Color.argb(
+                                        pixelAlpha, pixelRed,
+                                        pixelGreen, pixelBlue
+                                    )
+                                )
                             }
                         }
                         uiThread {
                             imageView.setImageBitmap(editedImage)
                             progressBarInvisible()
                             buttonsVisible()
-                            Toast.makeText(this@EditingActivity, "Применен эффект Розовый", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@EditingActivity,
+                                "Применен эффект Розовый",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                     buttonsVisible()
@@ -348,7 +383,7 @@ class EditingActivity : AppCompatActivity() {
                                 val pixelGreen = Color.green(pixelColor)
                                 val pixelBlue = Color.blue(pixelColor)
 
-                                val grey = (pixelRed + pixelGreen + pixelBlue)/3
+                                val grey = (pixelRed + pixelGreen + pixelBlue) / 3
 
                                 editedImage.setPixel(x, y, Color.argb(pixelAlpha, grey, grey, grey))
                             }
@@ -357,7 +392,11 @@ class EditingActivity : AppCompatActivity() {
                             imageView.setImageBitmap(editedImage)
                             progressBarInvisible()
                             buttonsVisible()
-                            Toast.makeText(this@EditingActivity, "Применен эффект Черно-белый 1", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@EditingActivity,
+                                "Применен эффект Черно-белый 1",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                     buttonsVisible()
@@ -381,21 +420,33 @@ class EditingActivity : AppCompatActivity() {
                                 val pixelGreen = Color.green(pixelColor)
                                 val pixelBlue = Color.blue(pixelColor)
 
-                                var mid = (pixelRed + pixelGreen + pixelBlue)/3
+                                var mid = (pixelRed + pixelGreen + pixelBlue) / 3
 
-                                if (mid in 0..115) { mid = 0 }
-                                else if (mid in 116..149) { mid = 134 }
-                                else if (mid in 155..255) { mid= 255 }
+                                if (mid in 0..115) {
+                                    mid = 0
+                                } else if (mid in 116..149) {
+                                    mid = 134
+                                } else if (mid in 155..255) {
+                                    mid = 255
+                                }
 
-                                editedImage.setPixel(x, y, Color.argb(pixelAlpha, mid,
-                                    mid, mid))
+                                editedImage.setPixel(
+                                    x, y, Color.argb(
+                                        pixelAlpha, mid,
+                                        mid, mid
+                                    )
+                                )
                             }
                         }
                         uiThread {
                             imageView.setImageBitmap(editedImage)
                             progressBarInvisible()
                             buttonsVisible()
-                            Toast.makeText(this@EditingActivity, "Применен эффект Черно-белый 2", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@EditingActivity,
+                                "Применен эффект Черно-белый 2",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                     buttonsVisible()
@@ -409,7 +460,7 @@ class EditingActivity : AppCompatActivity() {
 
 
     //масштабирование
-    private fun scaling(){
+    private fun scaling() {
         seekBarVisible()
         //алгоритм
         val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
@@ -420,7 +471,7 @@ class EditingActivity : AppCompatActivity() {
         Toast.makeText(this, "Выполнено масштабирование", Toast.LENGTH_SHORT).show()
     }
 
-    private fun retouch(){
+    private fun retouch() {
         val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
         var pixelAlpha: Int = 0
         var pixelRed: Int = 0
@@ -453,42 +504,6 @@ class EditingActivity : AppCompatActivity() {
         Toast.makeText(this, "Выполнена ретушь", Toast.LENGTH_SHORT).show()
         true
     }
-}
-
-//ретуширование
-private fun retouch(){
-    val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
-    var pixelAlpha: Int = 0
-    var pixelRed: Int = 0
-    var pixelGreen: Int = 0
-    var pixelBlue: Int = 0
-    var pixelColor: Int
-    val width = image.width
-    val height = image.height
-    val editedImage = Bitmap.createBitmap(width, height, image.config)
-    val size = width * height
-    for (x in 0 until width) {
-        for (y in 0 until height) {
-            pixelColor = image.getPixel(x, y)
-            pixelAlpha += Color.alpha(pixelColor)
-            pixelRed += Color.red(pixelColor)
-            pixelGreen += Color.green(pixelColor)
-            pixelBlue += Color.blue(pixelColor)
-        }
-    }
-    pixelAlpha /= size
-    pixelRed /= size
-    pixelGreen /= size
-    pixelBlue /= size
-    for (x in 0 until width) {
-        for (y in 0 until height) {
-            editedImage.setPixel(x, y, Color.argb(pixelAlpha, pixelRed, pixelGreen, pixelBlue))
-        }
-    }
-    imageView.setImageBitmap(editedImage)
-    Toast.makeText(this, "Выполнена ретушь", Toast.LENGTH_SHORT).show()
-    true
-}
 }
 
 
