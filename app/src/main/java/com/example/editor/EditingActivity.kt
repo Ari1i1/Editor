@@ -4,13 +4,9 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
-import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Environment
 import android.text.format.Time
-import android.util.Log
-import android.view.MotionEvent
-import android.view.MotionEvent.ACTION_MOVE
 import android.view.View
 import android.widget.PopupMenu
 import android.widget.SeekBar
