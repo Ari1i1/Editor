@@ -12,5 +12,7 @@
     <string name="nameEffect2">Розовый</string>
     <string name="nameEffect3">Черно-белый 1</string>
     <string name="nameEffect4">Черно-белый 2</string>
+    <string name="nameEffect5">Негатив</string>
+    <string name="nameEffect6">Сепия</string>
 
 </resources>
