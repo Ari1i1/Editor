@@ -36,7 +36,7 @@ class EditingActivity : AppCompatActivity() {
         seekBarInvisible()
         progressBarInvisible()
 
-        //поворот изображения
+        //--------поворот изображения
         rotateButton.setOnClickListener {
             rotate()
         }
@@ -44,7 +44,7 @@ class EditingActivity : AppCompatActivity() {
             rotate()
         }
 
-        //сохранение изображения
+        //--------сохранение изображения
         saveButton.setOnClickListener {
             save()
         }
@@ -52,7 +52,7 @@ class EditingActivity : AppCompatActivity() {
             save()
         }
 
-        //сброс изменений
+        //--------сброс изменений
         undoButton.setOnClickListener {
             undo(startImage)
         }
@@ -60,7 +60,7 @@ class EditingActivity : AppCompatActivity() {
             undo(startImage)
         }
 
-        //эффекты
+        //--------эффекты
         effectsButton.setOnClickListener {
             effects()
         }
@@ -68,7 +68,7 @@ class EditingActivity : AppCompatActivity() {
             effects()
         }
 
-        //масштабирование
+        //--------масштабирование
         scalingButton.setOnClickListener {
             scaling()
         }
@@ -76,7 +76,7 @@ class EditingActivity : AppCompatActivity() {
             scaling()
         }
 
-        //ретушь
+        //--------ретушь
         retouchButton.setOnClickListener {
             retouch()
         }
@@ -85,7 +85,7 @@ class EditingActivity : AppCompatActivity() {
         }
     }
 
-    //изменение активности SeekBar, ProgressBar и нижних кнопок
+    //----------изменение активности SeekBar, ProgressBar и нижних кнопок
     private fun seekBarVisible() {
         seekBar.visibility = View.VISIBLE
         degrees.visibility = View.VISIBLE
@@ -144,10 +144,10 @@ class EditingActivity : AppCompatActivity() {
         progressBar.visibility = View.GONE
     }
 
-    //поворот изображения
+    //----------поворот изображения
     private fun rotate() {
-        seekBarVisible()
         buttonsInvisible()
+        seekBarVisible()
         seekBar.max = 0
         seekBar.max = 360
         seekBar.progress = 180
@@ -163,14 +163,13 @@ class EditingActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seek: SeekBar) {
                 progressBarVisible()
                 seekBarInvisible()
-                val image = (imageView.drawable as BitmapDrawable).bitmap
-                var editedImage: Bitmap
 
                 doAsync {
-                    editedImage = rotation(seekBar.progress - 180, image)
+                    val rotatedImage = rotation(seekBar.progress - 180)
 
                     uiThread {
-                        imageView.setImageBitmap(editedImage)
+                        imageView.setImageBitmap(rotatedImage)
+                        seekBarInvisible()
                         progressBarInvisible()
                         buttonsVisible()
                         Toast.makeText(
@@ -183,36 +182,58 @@ class EditingActivity : AppCompatActivity() {
             }
         })
     }
-
     //алгоритм поворота
-    private fun rotation(angleStart: Int, Image: Bitmap): Bitmap {
+    private fun rotation(angleStart: Int): Bitmap {
         val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
         val width: Int = image.width
         val height: Int = image.height
+
+        val pixelsArray = IntArray(width * height)
+        image.getPixels(pixelsArray, 0, width, 0, 0, width, height)
+        val newPixelsArray = IntArray(width * height)
+
         val angle = Math.toRadians(angleStart.toDouble())
         val sin = sin(angle)
         val cos = cos(angle)
+
         val midX = 0.5 * (width - 1) // point to rotate about
         val midY = 0.5 * (height - 1) // center of image
-        val rotatedImage = Bitmap.createBitmap(height, width, image.config)
 
-        for (x in 0 until height) {
+        if (angleStart in -44 until 44) {
+            for (y in 0 until height) {
+                for (x in 0 until width) {
+                    val a = x - midX
+                    val b = y - midY
+                    val xx = (+a * cos - b * sin + midX).toInt()
+                    val yy = (+a * sin + b * cos + midY).toInt()
+                    if (xx in 0 until width && yy >= 0 && yy < height) {
+                        newPixelsArray[y * width + x] = pixelsArray[yy * width + xx]
+                    } else {
+                        newPixelsArray[y * width + x] = Color.argb(100, 0, 0, 0)
+                    }
+                }
+            }
+            return Bitmap.createBitmap(newPixelsArray, width, height, image.config)
+        }
+        else {
             for (y in 0 until width) {
+            for (x in 0 until height){
                 val a = x - midY
                 val b = y - midX
                 val xx = (+a * cos - b * sin + midX).toInt()
                 val yy = (+a * sin + b * cos + midY).toInt()
                 if (xx in 0 until width && yy >= 0 && yy < height) {
-                    rotatedImage.setPixel(x, y, image.getPixel(xx, yy))
+                    newPixelsArray[y*height+x] = pixelsArray[yy*width+xx]
                 } else {
-                    rotatedImage.setPixel(x, y, Color.argb(100, 0, 0, 0))
+                    newPixelsArray[y*height+x]  = Color.argb(100, 0, 0, 0)
                 }
             }
         }
-        return rotatedImage
+        return Bitmap.createBitmap(newPixelsArray, height, width, image.config)
+        }
     }
 
-    //сохранение изображения
+    //----------сохранение изображения
     private fun save() {
         var temp = 0
         buttonsInvisible()
@@ -263,14 +284,14 @@ class EditingActivity : AppCompatActivity() {
         }
     }
 
-    //сброс изменений
+    //----------сброс изменений
     private fun undo(startImage: Bitmap) {
         val image: Bitmap = startImage
         imageView.setImageBitmap(image)
         Toast.makeText(this@EditingActivity, "Изменения отменены", Toast.LENGTH_SHORT).show()
     }
 
-    //эффекты
+    //----------эффекты
     private fun effects() {
         val menu = PopupMenu(this, effectsButton)
         menu.inflate(R.menu.effects_menu)
@@ -538,7 +559,7 @@ class EditingActivity : AppCompatActivity() {
         menu.show()
     }
 
-    //масштабирование
+    //----------масштабирование
     private fun scaling() {
         seekBarVisible()
         //алгоритм
@@ -550,7 +571,7 @@ class EditingActivity : AppCompatActivity() {
         Toast.makeText(this, "Выполнено масштабирование", Toast.LENGTH_SHORT).show()
     }
 
-    //ретуширование
+    //----------ретуширование
     private fun retouch() {
         val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
         var pixelAlpha: Int = 0
