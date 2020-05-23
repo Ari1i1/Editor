@@ -298,61 +298,61 @@ class EditingActivity : AppCompatActivity() {
 
         menu.setOnMenuItemClickListener {
             when (it.itemId) {
-                //розовый неон
+                // Неоновый розовый
                 R.id.effect1 -> {
                     buttonsInvisible()
                     progressBarVisible()
                     val image = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
                     val height = image.height
-                    val editedImage = Bitmap.createBitmap(width, height, image.config)
+
+                    val pixelsArray = IntArray(width * height)
+                    image.getPixels(pixelsArray, 0, width, 0, 0, width, height)
+                    val newPixelsArray = IntArray(width * height)
 
                     doAsync {
-                        for (x in 0 until width) {
-                            for (y in 0 until height) {
-                                val pixelColor = image.getPixel(x, y)
-                                val pixelAlpha = Color.alpha(pixelColor)
-                                val pixelRed = Color.red(pixelColor)
-                                val pixelGreen = Color.green(pixelColor)
-                                val pixelBlue = Color.blue(pixelColor)
+                        for (y in 0 until height) {
+                            for (x in 0 until width) {
+                                val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
+                                val pixelRed = Color.red(pixelsArray[y*width+x])
+                                val pixelGreen = Color.green(pixelsArray[y*width+x])
+                                val pixelBlue = Color.blue(pixelsArray[y*width+x])
 
-                                editedImage.setPixel(
-                                    x,
-                                    y,
-                                    Color.argb(pixelAlpha, pixelBlue, pixelRed / 2, pixelGreen)
-                                )
+                                newPixelsArray[y*width+x] = Color.argb(pixelAlpha, pixelBlue, pixelRed / 2, pixelGreen)
                             }
                         }
                         uiThread {
-                            imageView.setImageBitmap(editedImage)
+                            imageView.setImageBitmap(Bitmap.createBitmap(newPixelsArray, width, height, image.config))
                             progressBarInvisible()
                             buttonsVisible()
                             Toast.makeText(
                                 this@EditingActivity,
-                                "Применен эффект Розовый неон",
+                                "Применен эффект Неоновый розовый",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
                     }
                     true
                 }
-                //розовый
+                // Розовый
                 R.id.effect2 -> {
                     buttonsInvisible()
                     progressBarVisible()
                     val image = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
                     val height = image.height
-                    val editedImage = Bitmap.createBitmap(width, height, image.config)
+
+                    val pixelsArray = IntArray(width * height)
+                    image.getPixels(pixelsArray, 0, width, 0, 0, width, height)
+                    val newPixelsArray = IntArray(width * height)
 
                     doAsync {
-                        for (x in 0 until width) {
-                            for (y in 0 until height) {
-                                val pixelColor = image.getPixel(x, y)
-                                var pixelAlpha = Color.alpha(pixelColor)
-                                var pixelRed = Color.red(pixelColor)
-                                var pixelGreen = Color.green(pixelColor)
-                                var pixelBlue = Color.blue(pixelColor)
+                        for (y in 0 until height) {
+                            for (x in 0 until width) {
+                                var pixelAlpha = Color.alpha(pixelsArray[y*width+x])
+                                val pixelRed = Color.red(pixelsArray[y*width+x])
+                                var pixelGreen = Color.green(pixelsArray[y*width+x])
+                                var pixelBlue = Color.blue(pixelsArray[y*width+x])
 
                                 if (pixelAlpha >= 10) {
                                     pixelAlpha -= 10
@@ -364,16 +364,11 @@ class EditingActivity : AppCompatActivity() {
                                     pixelBlue += 10
                                 }
 
-                                editedImage.setPixel(
-                                    x, y, Color.argb(
-                                        pixelAlpha, pixelRed,
-                                        pixelGreen, pixelBlue
-                                    )
-                                )
+                                newPixelsArray[y*width+x] = Color.argb( pixelAlpha, pixelRed, pixelGreen, pixelBlue)
                             }
                         }
                         uiThread {
-                            imageView.setImageBitmap(editedImage)
+                            imageView.setImageBitmap(Bitmap.createBitmap(newPixelsArray, width, height, image.config))
                             progressBarInvisible()
                             buttonsVisible()
                             Toast.makeText(
@@ -386,31 +381,33 @@ class EditingActivity : AppCompatActivity() {
                     true
 
                 }
-                //черно-белый 1
+                // Черно-белый 1
                 R.id.effect3 -> {
                     buttonsInvisible()
                     progressBarVisible()
                     val image = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
                     val height = image.height
-                    val editedImage = Bitmap.createBitmap(width, height, image.config)
+
+                    val pixelsArray = IntArray(width * height)
+                    image.getPixels(pixelsArray, 0, width, 0, 0, width, height)
+                    val newPixelsArray = IntArray(width * height)
 
                     doAsync {
-                        for (x in 0 until width) {
-                            for (y in 0 until height) {
-                                val pixelColor = image.getPixel(x, y)
-                                val pixelAlpha = Color.alpha(pixelColor)
-                                val pixelRed = Color.red(pixelColor)
-                                val pixelGreen = Color.green(pixelColor)
-                                val pixelBlue = Color.blue(pixelColor)
+                        for (y in 0 until height) {
+                            for (x in 0 until width) {
+                                val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
+                                val pixelRed = Color.red(pixelsArray[y*width+x])
+                                val pixelGreen = Color.green(pixelsArray[y*width+x])
+                                val pixelBlue = Color.blue(pixelsArray[y*width+x])
 
                                 val grey = (pixelRed + pixelGreen + pixelBlue) / 3
 
-                                editedImage.setPixel(x, y, Color.argb(pixelAlpha, grey, grey, grey))
+                                newPixelsArray[y*width+x] = Color.argb(pixelAlpha, grey, grey, grey)
                             }
                         }
                         uiThread {
-                            imageView.setImageBitmap(editedImage)
+                            imageView.setImageBitmap(Bitmap.createBitmap(newPixelsArray, width, height, image.config))
                             progressBarInvisible()
                             buttonsVisible()
                             Toast.makeText(
@@ -422,23 +419,25 @@ class EditingActivity : AppCompatActivity() {
                     }
                     true
                 }
-                //черно-белый 2
+                // Черно-белый 2
                 R.id.effect4 -> {
                     buttonsInvisible()
                     progressBarVisible()
                     val image = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
                     val height = image.height
-                    val editedImage = Bitmap.createBitmap(width, height, image.config)
+
+                    val pixelsArray = IntArray(width * height)
+                    image.getPixels(pixelsArray, 0, width, 0, 0, width, height)
+                    val newPixelsArray = IntArray(width * height)
 
                     doAsync {
-                        for (x in 0 until width) {
-                            for (y in 0 until height) {
-                                val pixelColor = image.getPixel(x, y)
-                                val pixelAlpha = Color.alpha(pixelColor)
-                                val pixelRed = Color.red(pixelColor)
-                                val pixelGreen = Color.green(pixelColor)
-                                val pixelBlue = Color.blue(pixelColor)
+                        for (y in 0 until height) {
+                            for (x in 0 until width) {
+                                val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
+                                val pixelRed = Color.red(pixelsArray[y*width+x])
+                                val pixelGreen = Color.green(pixelsArray[y*width+x])
+                                val pixelBlue = Color.blue(pixelsArray[y*width+x])
 
                                 var mid = (pixelRed + pixelGreen + pixelBlue) / 3
 
@@ -450,16 +449,11 @@ class EditingActivity : AppCompatActivity() {
                                     mid = 255
                                 }
 
-                                editedImage.setPixel(
-                                    x, y, Color.argb(
-                                        pixelAlpha, mid,
-                                        mid, mid
-                                    )
-                                )
+                                newPixelsArray[y*width+x] = Color.argb(pixelAlpha, mid, mid, mid)
                             }
                         }
                         uiThread {
-                            imageView.setImageBitmap(editedImage)
+                            imageView.setImageBitmap(Bitmap.createBitmap(newPixelsArray, width, height, image.config))
                             progressBarInvisible()
                             buttonsVisible()
                             Toast.makeText(
@@ -471,32 +465,32 @@ class EditingActivity : AppCompatActivity() {
                     }
                     true
                 }
-                //Негатив
+                // Негатив
                 R.id.effect5 -> {
                     buttonsInvisible()
                     progressBarVisible()
                     val image = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
                     val height = image.height
-                    val editedImage = Bitmap.createBitmap(width, height, image.config)
+
+                    val pixelsArray = IntArray(width * height)
+                    image.getPixels(pixelsArray, 0, width, 0, 0, width, height)
+                    val newPixelsArray = IntArray(width * height)
 
                     doAsync {
-                        for (x in 0 until width) {
-                            for (y in 0 until height) {
-                                val pixelColor = image.getPixel(x, y)
-                                val pixelAlpha = Color.alpha(pixelColor)
-                                val pixelRed = Color.red(pixelColor)
-                                val pixelGreen = Color.green(pixelColor)
-                                val pixelBlue = Color.blue(pixelColor)
+                        for (y in 0 until height) {
+                            for (x in 0 until width) {
+                                val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
+                                val pixelRed = Color.red(pixelsArray[y*width+x])
+                                val pixelGreen = Color.green(pixelsArray[y*width+x])
+                                val pixelBlue = Color.blue(pixelsArray[y*width+x])
 
-                                editedImage.setPixel(
-                                    x, y, Color.argb(
-                                        pixelAlpha, 255-pixelRed, 255-pixelGreen, 255-pixelBlue)
-                                    )
+                                newPixelsArray[y*width+x] = Color.argb(pixelAlpha, 255-pixelRed,
+                                    255-pixelGreen, 255-pixelBlue)
                             }
                         }
                         uiThread {
-                            imageView.setImageBitmap(editedImage)
+                            imageView.setImageBitmap(Bitmap.createBitmap(newPixelsArray, width, height, image.config))
                             progressBarInvisible()
                             buttonsVisible()
                             Toast.makeText(
@@ -508,23 +502,25 @@ class EditingActivity : AppCompatActivity() {
                     }
                     true
                 }
-                //Сепия
+                // Сепия
                 R.id.effect6 -> {
                     buttonsInvisible()
                     progressBarVisible()
                     val image = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
                     val height = image.height
-                    val editedImage = Bitmap.createBitmap(width, height, image.config)
+
+                    val pixelsArray = IntArray(width * height)
+                    image.getPixels(pixelsArray, 0, width, 0, 0, width, height)
+                    val newPixelsArray = IntArray(width * height)
 
                     doAsync {
-                        for (x in 0 until width) {
-                            for (y in 0 until height) {
-                                val pixelColor = image.getPixel(x, y)
-                                val pixelAlpha = Color.alpha(pixelColor)
-                                var pixelRed = Color.red(pixelColor)
-                                var pixelGreen = Color.green(pixelColor)
-                                var pixelBlue = Color.blue(pixelColor)
+                        for (y in 0 until height) {
+                            for (x in 0 until width) {
+                                val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
+                                var pixelRed = Color.red(pixelsArray[y*width+x])
+                                var pixelGreen = Color.green(pixelsArray[y*width+x])
+                                var pixelBlue = Color.blue(pixelsArray[y*width+x])
 
                                 pixelRed =(pixelRed * 0.393 + pixelGreen * 0.769 + pixelBlue * 0.189).toInt()
                                 pixelGreen =(pixelRed * 0.349 + pixelGreen * 0.686 + pixelBlue * 0.168).toInt()
@@ -534,14 +530,12 @@ class EditingActivity : AppCompatActivity() {
                                 if (pixelGreen > 255) pixelGreen = 255
                                 if (pixelBlue > 255) pixelBlue = 255
 
-                                editedImage.setPixel(
-                                    x, y, Color.argb(
+                                newPixelsArray[y*width+x] = Color.argb(
                                         pixelAlpha, pixelRed, pixelGreen, pixelBlue)
-                                )
                             }
                         }
                         uiThread {
-                            imageView.setImageBitmap(editedImage)
+                            imageView.setImageBitmap(Bitmap.createBitmap(newPixelsArray, width, height, image.config))
                             progressBarInvisible()
                             buttonsVisible()
                             Toast.makeText(
