@@ -379,7 +379,6 @@ class EditingActivity : AppCompatActivity() {
                         }
                     }
                     true
-
                 }
                 // Черно-белый 1
                 R.id.effect3 -> {
@@ -555,14 +554,116 @@ class EditingActivity : AppCompatActivity() {
 
     //----------масштабирование
     private fun scaling() {
+        buttonsInvisible()
         seekBarVisible()
-        //алгоритм
-        val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
-        val width = image.width
-        val height = image.height
+        seekBar.max = 0
+        seekBar.max = 200
+        seekBar.progress = 100
+        degrees.text = "100%"
 
-        seekBarInvisible()
-        Toast.makeText(this, "Выполнено масштабирование", Toast.LENGTH_SHORT).show()
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seek: SeekBar, progess: Int, fromUser: Boolean) {
+                degrees.text = (seek.progress).toString() + "%"
+            }
+
+            override fun onStartTrackingTouch(seek: SeekBar) {
+            }
+
+            override fun onStopTrackingTouch(seek: SeekBar) {
+                progressBarVisible()
+                seekBarInvisible()
+
+                doAsync {
+                    val scaledImage = bilinearInterpolation((seek.progress).toDouble() / 100)
+
+                    uiThread {
+                        //imageView.setImageBitmap(scaledImage)
+                        imageView.setImageBitmap(scaledImage)
+                        seekBarInvisible()
+                        progressBarInvisible()
+                        buttonsVisible()
+                        if (seek.progress > 100) {
+                            Toast.makeText(
+                            this@EditingActivity,
+                            "Изображение увеличено на " + (seek.progress - 100) + "%",
+                            Toast.LENGTH_SHORT).show()
+                        }
+                        else {
+                            Toast.makeText(
+                                this@EditingActivity,
+                                "Изображение уменьшено на " + (100 - seek.progress) + "%",
+                                Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    //----------алгоритм масштабирования (билинейная интерполяция)
+    private fun bilinearInterpolation(ratio: Double): Bitmap {
+        val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
+        // высота и ширина оригинала
+        val width1 = image.width
+        val height1 = image.height
+
+        val pixelsArray = IntArray(width1 * height1)
+        image.getPixels(pixelsArray, 0, width1, 0, 0, width1, height1)
+
+        // новые ширина и высота с учет
+        val width2 = (image.width * ratio).toInt()
+        val height2 = (image.height * ratio).toInt()
+        val newPixelsArray = IntArray(width2 * height2)
+
+        // рассмотрим квадрат пикселей 2х2
+        var a: Int   // верхний левый пиксель
+        var b: Int   // верхий правый
+        var c: Int   // нижний левый
+        var d: Int   // нижний правый
+        var x: Int
+        var y: Int
+        var index: Int
+
+        val xRatio = (width1 - 1).toFloat() / width2
+        val yRatio = (height1 - 1).toFloat() / height2
+        var xDiff: Float
+        var yDiff: Float
+        var blue: Float
+        var red: Float
+        var green: Float
+        var offset = 0
+
+        for (i in 0 until height2) {
+            for (j in 0 until width2) {
+                x = (xRatio * j).toInt()
+                y = (yRatio * i).toInt()
+                xDiff = xRatio * j - x
+                yDiff = yRatio * i - y
+                index = y * width1 + x
+                a = pixelsArray[index]
+                b = pixelsArray[index + 1]
+                c = pixelsArray[index + width1]
+                d = pixelsArray[index + width1 + 1]
+
+                blue = (a and 0xff) * (1 - xDiff) * (1 - yDiff) + (b and 0xff) *
+                        xDiff * (1 - yDiff) + (c and 0xff) * yDiff *
+                        (1 - xDiff) + (d and 0xff) * (xDiff * yDiff)
+
+                green = (a shr 8 and 0xff) * (1 - xDiff) * (1 - yDiff) + (b shr 8 and 0xff) *
+                        xDiff * (1 - yDiff) + (c shr 8 and 0xff) * yDiff * (1 - xDiff) +
+                        (d shr 8 and 0xff) * (xDiff * yDiff)
+
+                red = (a shr 16 and 0xff) * (1 - xDiff) * (1 - yDiff) + (b shr 16 and 0xff) *
+                        xDiff * (1 - yDiff) + (c shr 16 and 0xff) * yDiff * (1 - xDiff) +
+                        (d shr 16 and 0xff) * (xDiff * yDiff)
+
+                newPixelsArray[offset++] = -0x1000000 or
+                        (red.toInt() shl 16 and 0xff0000) or
+                        (green.toInt() shl 8 and 0xff00) or
+                        blue.toInt()
+            }
+        }
+        return Bitmap.createBitmap(newPixelsArray, width2, height2, image.config)
     }
 
     //----------ретуширование
