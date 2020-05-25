@@ -237,6 +237,7 @@ class EditingActivity : AppCompatActivity() {
     private fun save() {
         var temp = 0
         buttonsInvisible()
+        progressBarVisible()
 
         doAsync {
             val mainImage: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
