@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.text.format.Time
+import android.view.MotionEvent
 import android.view.View
 import android.widget.PopupMenu
 import android.widget.SeekBar
@@ -217,19 +218,19 @@ class EditingActivity : AppCompatActivity() {
         }
         else {
             for (y in 0 until width) {
-            for (x in 0 until height){
-                val a = x - midY
-                val b = y - midX
-                val xx = (+a * cos - b * sin + midX).toInt()
-                val yy = (+a * sin + b * cos + midY).toInt()
-                if (xx in 0 until width && yy >= 0 && yy < height) {
-                    newPixelsArray[y*height+x] = pixelsArray[yy*width+xx]
-                } else {
-                    newPixelsArray[y*height+x]  = Color.argb(100, 0, 0, 0)
+                for (x in 0 until height){
+                    val a = x - midY
+                    val b = y - midX
+                    val xx = (+a * cos - b * sin + midX).toInt()
+                    val yy = (+a * sin + b * cos + midY).toInt()
+                    if (xx in 0 until width && yy >= 0 && yy < height) {
+                        newPixelsArray[y*height+x] = pixelsArray[yy*width+xx]
+                    } else {
+                        newPixelsArray[y*height+x]  = Color.argb(100, 0, 0, 0)
+                    }
                 }
             }
-        }
-        return Bitmap.createBitmap(newPixelsArray, height, width, image.config)
+            return Bitmap.createBitmap(newPixelsArray, height, width, image.config)
         }
     }
 
@@ -585,9 +586,9 @@ class EditingActivity : AppCompatActivity() {
                         buttonsVisible()
                         if (seek.progress > 100) {
                             Toast.makeText(
-                            this@EditingActivity,
-                            "Изображение увеличено на " + (seek.progress - 100) + "%",
-                            Toast.LENGTH_SHORT).show()
+                                this@EditingActivity,
+                                "Изображение увеличено на " + (seek.progress - 100) + "%",
+                                Toast.LENGTH_SHORT).show()
                         }
                         else {
                             Toast.makeText(
@@ -669,38 +670,79 @@ class EditingActivity : AppCompatActivity() {
 
     //----------ретуширование
     private fun retouch() {
+
         val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
-        var pixelAlpha: Int = 0
-        var pixelRed: Int = 0
-        var pixelGreen: Int = 0
-        var pixelBlue: Int = 0
-        var pixelColor: Int
-        val width = image.width
-        val height = image.height
+        val s = 10000
+        val xCoordinates = IntArray(s)
+        val yCoordinates = IntArray(s)
+        val pixelValue = IntArray(s)
+        var count = 0
+        imageView.setOnTouchListener { v, event ->
+            var x = event.x.toInt()
+            var y = event.y.toInt()
+            for (i in 0 until 21)
+                for (j in 0 until 21) {
+                    if (x in 0 until image.width)
+                        if (y in 0 until image.height) {
+                            x = x - 10 + i
+                            y = y - 10 + j
+                            xCoordinates[count] = x
+                            yCoordinates[count] = y
+                            pixelValue[count] = image.getPixel(x, y)
+                            count += 1
+                        }
+                }
+            when (event.action) {
+                MotionEvent.ACTION_UP -> retouchAlg(image, count)
+                else -> {
+                }
+            }
+            true
+        }
+    }
+
+    private fun retouchAlg(image: Bitmap, count: Int) {
+        val width = count
+        val height = count
         val editedImage = Bitmap.createBitmap(width, height, image.config)
         val size = width * height
-        for (x in 0 until width) {
-            for (y in 0 until height) {
-                pixelColor = image.getPixel(x, y)
-                pixelAlpha += Color.alpha(pixelColor)
-                pixelRed += Color.red(pixelColor)
-                pixelGreen += Color.green(pixelColor)
-                pixelBlue += Color.blue(pixelColor)
-            }
-        }
-        pixelAlpha /= size
-        pixelRed /= size
-        pixelGreen /= size
-        pixelBlue /= size
-        for (x in 0 until width) {
-            for (y in 0 until height) {
-                editedImage.setPixel(x, y, Color.argb(pixelAlpha, pixelRed, pixelGreen, pixelBlue))
+        for (xx in 0 until count) {
+            for (yy in 0 until count) {
+                var pixelAlpha: Int = 0
+                var pixelRed: Int = 0
+                var pixelGreen: Int = 0
+                var pixelBlue: Int = 0
+                var pixelColor: Int
+                for (x in 0 until count) {
+                    for (y in 0 until count) {
+                        pixelColor = image.getPixel(x, y)
+                        pixelAlpha += Color.alpha(pixelColor)
+                        pixelRed += Color.red(pixelColor)
+                        pixelGreen += Color.green(pixelColor)
+                        pixelBlue += Color.blue(pixelColor)
+                    }
+                }
+                pixelAlpha /= size
+                pixelRed /= size
+                pixelGreen /= size
+                pixelBlue /= size
+                for (x in 0 until count) {
+                    for (y in 0 until count) {
+                        editedImage.setPixel(
+                            x,
+                            y,
+                            Color.argb(pixelAlpha, pixelRed, pixelGreen, pixelBlue)
+                        )
+                    }
+                }
             }
         }
         imageView.setImageBitmap(editedImage)
         Toast.makeText(this, "Выполнена ретушь", Toast.LENGTH_SHORT).show()
         true
     }
+
+
 }
 
 
