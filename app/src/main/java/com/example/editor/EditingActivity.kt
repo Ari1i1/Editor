@@ -8,6 +8,8 @@ import android.os.Bundle
 import android.os.Environment
 import android.text.format.Time
 import android.view.MotionEvent
+import android.view.MotionEvent.ACTION_DOWN
+import android.view.MotionEvent.ACTION_MOVE
 import android.view.View
 import android.widget.PopupMenu
 import android.widget.SeekBar
@@ -218,19 +220,19 @@ class EditingActivity : AppCompatActivity() {
         }
         else {
             for (y in 0 until width) {
-                for (x in 0 until height){
-                    val a = x - midY
-                    val b = y - midX
-                    val xx = (+a * cos - b * sin + midX).toInt()
-                    val yy = (+a * sin + b * cos + midY).toInt()
-                    if (xx in 0 until width && yy >= 0 && yy < height) {
-                        newPixelsArray[y*height+x] = pixelsArray[yy*width+xx]
-                    } else {
-                        newPixelsArray[y*height+x]  = Color.argb(100, 0, 0, 0)
-                    }
+            for (x in 0 until height){
+                val a = x - midY
+                val b = y - midX
+                val xx = (+a * cos - b * sin + midX).toInt()
+                val yy = (+a * sin + b * cos + midY).toInt()
+                if (xx in 0 until width && yy >= 0 && yy < height) {
+                    newPixelsArray[y*height+x] = pixelsArray[yy*width+xx]
+                } else {
+                    newPixelsArray[y*height+x]  = Color.argb(100, 0, 0, 0)
                 }
             }
-            return Bitmap.createBitmap(newPixelsArray, height, width, image.config)
+        }
+        return Bitmap.createBitmap(newPixelsArray, height, width, image.config)
         }
     }
 
@@ -245,7 +247,7 @@ class EditingActivity : AppCompatActivity() {
             val time = Time()
             time.setToNow()
             val externalStorageState = Environment.getExternalStorageState()
-            if (externalStorageState.equals(Environment.MEDIA_MOUNTED)) {
+            if (externalStorageState == Environment.MEDIA_MOUNTED) {
                 val storageDirectory = Environment.getExternalStorageDirectory().toString()
                 val file = File(
                     storageDirectory,
@@ -586,9 +588,9 @@ class EditingActivity : AppCompatActivity() {
                         buttonsVisible()
                         if (seek.progress > 100) {
                             Toast.makeText(
-                                this@EditingActivity,
-                                "Изображение увеличено на " + (seek.progress - 100) + "%",
-                                Toast.LENGTH_SHORT).show()
+                            this@EditingActivity,
+                            "Изображение увеличено на " + (seek.progress - 100) + "%",
+                            Toast.LENGTH_SHORT).show()
                         }
                         else {
                             Toast.makeText(
@@ -670,81 +672,82 @@ class EditingActivity : AppCompatActivity() {
 
     //----------ретуширование
     private fun retouch() {
-
         val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
         val s = 10000
         val xCoordinates = IntArray(s)
         val yCoordinates = IntArray(s)
         val pixelValue = IntArray(s)
         var count = 0
-        imageView.setOnTouchListener { v, event ->
-            var x = event.x.toInt()
-            var y = event.y.toInt()
-            for (i in 0 until 21)
-                for (j in 0 until 21) {
-                    if (x in 0 until image.width)
-                        if (y in 0 until image.height) {
-                            x = x - 10 + i
-                            y = y - 10 + j
-                            xCoordinates[count] = x
-                            yCoordinates[count] = y
-                            pixelValue[count] = image.getPixel(x, y)
-                            count += 1
+        var editingImage: Bitmap = image
+        buttonsInvisible()
+
+        doAsync {
+            imageView.setOnTouchListener { imageView, event ->
+                when (event!!.action) {
+                    (ACTION_MOVE or ACTION_DOWN) -> {
+                        ///алгоритм
+                        var x = event.x.toInt()
+                        var y = event.y.toInt()
+                        for (i in 0 until 21) {
+                            for (j in 0 until 21) {
+                                if (x in 0 until image.width) {
+                                    if (y in 0 until image.height) {
+                                        x = x - 10 + i
+                                        y = y - 10 + j
+                                        xCoordinates[count] = x
+                                        yCoordinates[count] = y
+                                        pixelValue[count] = image.getPixel(x, y)
+                                        count++
+                                    }
+                                }
+                            }
                         }
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        editingImage = retouchAlg(image, pixelValue, count, xCoordinates, yCoordinates)
+                    }
                 }
-            when (event.action) {
-                MotionEvent.ACTION_UP -> retouchAlg(image, count)
-                else -> {
-                }
+                imageView.onTouchEvent(event)
             }
-            true
+            uiThread {
+                //imageView.setImageBitmap(scaledImage)
+                imageView.setImageBitmap(editingImage)
+                progressBarInvisible()
+                buttonsVisible()
+                Toast.makeText(this@EditingActivity, "Выполнена ретушь", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
-    private fun retouchAlg(image: Bitmap, count: Int) {
-        val width = count
-        val height = count
-        val editedImage = Bitmap.createBitmap(width, height, image.config)
-        val size = width * height
-        for (xx in 0 until count) {
-            for (yy in 0 until count) {
-                var pixelAlpha: Int = 0
-                var pixelRed: Int = 0
-                var pixelGreen: Int = 0
-                var pixelBlue: Int = 0
-                var pixelColor: Int
-                for (x in 0 until count) {
-                    for (y in 0 until count) {
-                        pixelColor = image.getPixel(x, y)
-                        pixelAlpha += Color.alpha(pixelColor)
-                        pixelRed += Color.red(pixelColor)
-                        pixelGreen += Color.green(pixelColor)
-                        pixelBlue += Color.blue(pixelColor)
-                    }
-                }
-                pixelAlpha /= size
-                pixelRed /= size
-                pixelGreen /= size
-                pixelBlue /= size
-                for (x in 0 until count) {
-                    for (y in 0 until count) {
-                        editedImage.setPixel(
-                            x,
-                            y,
-                            Color.argb(pixelAlpha, pixelRed, pixelGreen, pixelBlue)
-                        )
-                    }
-                }
-            }
+    private fun retouchAlg(image: Bitmap, pixelValue: IntArray, count: Int,
+                           xCoordinates: IntArray, yCoordinates: IntArray): Bitmap {
+        var pixelAlpha = 0
+        var pixelRed = 0
+        var pixelGreen = 0
+        var pixelBlue = 0
+        var pixelColor: Int
+
+        for (i in 0 until count) {
+            pixelColor = pixelValue[i]
+            pixelAlpha += Color.alpha(pixelColor)
+            pixelRed += Color.red(pixelColor)
+            pixelGreen += Color.green(pixelColor)
+            pixelBlue += Color.blue(pixelColor)
         }
-        imageView.setImageBitmap(editedImage)
-        Toast.makeText(this, "Выполнена ретушь", Toast.LENGTH_SHORT).show()
-        true
+
+        pixelAlpha /= count
+        pixelRed /= count
+        pixelGreen /= count
+        pixelBlue /= count
+        val editedImage = Bitmap.createBitmap(image.width, image.height, image.config)
+
+        for (i in 0 until count) {
+            editedImage.setPixel(xCoordinates[i], yCoordinates[i],
+                Color.argb(pixelAlpha, pixelRed, pixelGreen, pixelBlue))
+        }
+        return editedImage
     }
-
-
 }
-
 
 
 
