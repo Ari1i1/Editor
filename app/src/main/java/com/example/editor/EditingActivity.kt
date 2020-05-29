@@ -384,7 +384,6 @@ class EditingActivity : AppCompatActivity() {
                 R.id.effect1 -> {
                     buttonsInvisible()
                     progressBarVisible()
-                    cancelVisible()
                     val image = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
                     val height = image.height
@@ -394,7 +393,6 @@ class EditingActivity : AppCompatActivity() {
                     val newPixelsArray = IntArray(width * height)
 
                     doAsync {
-                        cancelInvisible()
                         for (y in 0 until height) {
                             for (x in 0 until width) {
                                 val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
@@ -424,7 +422,6 @@ class EditingActivity : AppCompatActivity() {
                 R.id.effect2 -> {
                     buttonsInvisible()
                     progressBarVisible()
-                    cancelVisible()
                     val image = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
                     val height = image.height
@@ -434,7 +431,6 @@ class EditingActivity : AppCompatActivity() {
                     val newPixelsArray = IntArray(width * height)
 
                     doAsync {
-                        cancelInvisible()
                         for (y in 0 until height) {
                             for (x in 0 until width) {
                                 var pixelAlpha = Color.alpha(pixelsArray[y*width+x])
@@ -474,7 +470,6 @@ class EditingActivity : AppCompatActivity() {
                 R.id.effect3 -> {
                     buttonsInvisible()
                     progressBarVisible()
-                    cancelVisible()
                     val image = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
                     val height = image.height
@@ -484,7 +479,6 @@ class EditingActivity : AppCompatActivity() {
                     val newPixelsArray = IntArray(width * height)
 
                     doAsync {
-                        cancelInvisible()
                         for (y in 0 until height) {
                             for (x in 0 until width) {
                                 val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
@@ -516,7 +510,6 @@ class EditingActivity : AppCompatActivity() {
                 R.id.effect4 -> {
                     buttonsInvisible()
                     progressBarVisible()
-                    cancelVisible()
                     val image = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
                     val height = image.height
@@ -526,7 +519,6 @@ class EditingActivity : AppCompatActivity() {
                     val newPixelsArray = IntArray(width * height)
 
                     doAsync {
-                        cancelInvisible()
                         for (y in 0 until height) {
                             for (x in 0 until width) {
                                 val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
@@ -566,7 +558,6 @@ class EditingActivity : AppCompatActivity() {
                 R.id.effect5 -> {
                     buttonsInvisible()
                     progressBarVisible()
-                    cancelVisible()
                     val image = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
                     val height = image.height
@@ -576,7 +567,6 @@ class EditingActivity : AppCompatActivity() {
                     val newPixelsArray = IntArray(width * height)
 
                     doAsync {
-                        cancelInvisible()
                         for (y in 0 until height) {
                             for (x in 0 until width) {
                                 val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
@@ -607,7 +597,6 @@ class EditingActivity : AppCompatActivity() {
                 R.id.effect6 -> {
                     buttonsInvisible()
                     progressBarVisible()
-                    cancelVisible()
                     val image = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
                     val height = image.height
@@ -617,7 +606,6 @@ class EditingActivity : AppCompatActivity() {
                     val newPixelsArray = IntArray(width * height)
 
                     doAsync {
-                        cancelInvisible()
                         for (y in 0 until height) {
                             for (x in 0 until width) {
                                 val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
@@ -738,19 +726,19 @@ class EditingActivity : AppCompatActivity() {
         val pixelsArray = IntArray(width1 * height1)
         image.getPixels(pixelsArray, 0, width1, 0, 0, width1, height1)
 
-        // новые ширина и высота с учет
+        // новые ширина и высота с учетом коэффициента
         val width2 = (image.width * ratio).toInt()
         val height2 = (image.height * ratio).toInt()
         val newPixelsArray = IntArray(width2 * height2)
 
-        // рассмотрим квадрат пикселей 2х2
+        var x: Int
+        var y: Int
+        var index: Int
+        // квадрат пикселей 2х2
         var a: Int   // верхний левый пиксель
         var b: Int   // верхий правый
         var c: Int   // нижний левый
         var d: Int   // нижний правый
-        var x: Int
-        var y: Int
-        var index: Int
 
         val xRatio = (width1 - 1).toFloat() / width2
         val yRatio = (height1 - 1).toFloat() / height2
