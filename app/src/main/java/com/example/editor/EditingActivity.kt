@@ -189,9 +189,10 @@ class EditingActivity : AppCompatActivity() {
     //----------поворот изображения
     private fun rotate(originalImage: Bitmap) {
         var rotatedImage: Bitmap = originalImage
+
+        cancelVisible()
         buttonsInvisible()
         seekBarVisible()
-        cancelVisible()
         seekBar.max = 0
         seekBar.max = 360
         seekBar.progress = 180
@@ -216,7 +217,6 @@ class EditingActivity : AppCompatActivity() {
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seek: SeekBar, progess: Int, fromUser: Boolean) {
                 degrees.text = (seek.progress - 180).toString() + "°"
-                cancelInvisible()
             }
 
             override fun onStartTrackingTouch(seek: SeekBar) {
@@ -227,6 +227,7 @@ class EditingActivity : AppCompatActivity() {
                 seekBarInvisible()
 
                 doAsync {
+                    cancelInvisible()
                     rotatedImage = rotation(seekBar.progress - 180)
 
                     uiThread {
@@ -393,6 +394,7 @@ class EditingActivity : AppCompatActivity() {
                     val newPixelsArray = IntArray(width * height)
 
                     doAsync {
+                        cancelInvisible()
                         for (y in 0 until height) {
                             for (x in 0 until width) {
                                 val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
@@ -432,6 +434,7 @@ class EditingActivity : AppCompatActivity() {
                     val newPixelsArray = IntArray(width * height)
 
                     doAsync {
+                        cancelInvisible()
                         for (y in 0 until height) {
                             for (x in 0 until width) {
                                 var pixelAlpha = Color.alpha(pixelsArray[y*width+x])
@@ -481,6 +484,7 @@ class EditingActivity : AppCompatActivity() {
                     val newPixelsArray = IntArray(width * height)
 
                     doAsync {
+                        cancelInvisible()
                         for (y in 0 until height) {
                             for (x in 0 until width) {
                                 val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
@@ -522,6 +526,7 @@ class EditingActivity : AppCompatActivity() {
                     val newPixelsArray = IntArray(width * height)
 
                     doAsync {
+                        cancelInvisible()
                         for (y in 0 until height) {
                             for (x in 0 until width) {
                                 val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
@@ -571,6 +576,7 @@ class EditingActivity : AppCompatActivity() {
                     val newPixelsArray = IntArray(width * height)
 
                     doAsync {
+                        cancelInvisible()
                         for (y in 0 until height) {
                             for (x in 0 until width) {
                                 val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
@@ -611,6 +617,7 @@ class EditingActivity : AppCompatActivity() {
                     val newPixelsArray = IntArray(width * height)
 
                     doAsync {
+                        cancelInvisible()
                         for (y in 0 until height) {
                             for (x in 0 until width) {
                                 val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
@@ -683,7 +690,6 @@ class EditingActivity : AppCompatActivity() {
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seek: SeekBar, progess: Int, fromUser: Boolean) {
                 degrees.text = (seek.progress).toString() + "%"
-                cancelInvisible()
             }
 
             override fun onStartTrackingTouch(seek: SeekBar) {
@@ -694,6 +700,7 @@ class EditingActivity : AppCompatActivity() {
                 seekBarInvisible()
 
                 doAsync {
+                    cancelInvisible()
                     scaledImage = bilinearInterpolation((seek.progress).toDouble() / 100)
 
                     uiThread {
