@@ -1,6 +1,7 @@
 package com.example.editor
 
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
@@ -19,6 +20,7 @@ import org.jetbrains.anko.uiThread
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -104,11 +106,26 @@ class EditingActivity : AppCompatActivity() {
         }
 
         //--------билин., трилин. фильтрация
-        filtrationButton.setOnClickListener {
-            Toast.makeText(this@EditingActivity, "Функция в стадии разработки", Toast.LENGTH_SHORT).show()
+        unsharpMaskingButton.setOnClickListener {
+            val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
+            val amount: Float= 100.3567F
+            val threshold = 100
+            val radius = 100
+           val temp = unsharpMasking(amount, threshold, radius, image)
+//            val temp = blurring(image, radius)
+            imageView.setImageBitmap(temp)
+            Toast.makeText(this@EditingActivity, "Выполнено маскирование", Toast.LENGTH_SHORT).show()
         }
-        filtrationText.setOnClickListener {
-            Toast.makeText(this@EditingActivity, "Функция в стадии разработки", Toast.LENGTH_SHORT).show()
+        unsharpMaskingText.setOnClickListener {
+            val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
+            val amount: Float= 100.3567F
+            val threshold = 100
+            val radius = 100
+//            val temp = blurring(image, radius)
+            val temp = unsharpMasking(amount, threshold, radius, image)
+            imageView.setImageBitmap(temp)
+            Toast.makeText(this@EditingActivity, "Выполнено маскирование", Toast.LENGTH_SHORT).show()
+
         }
     }
 
@@ -124,7 +141,7 @@ class EditingActivity : AppCompatActivity() {
         scalingButton.visibility = View.GONE
         retouchButton.visibility = View.GONE
         segmentationButton.visibility = View.GONE
-        filtrationButton.visibility = View.GONE
+        unsharpMaskingButton.visibility = View.GONE
         saveButton.visibility = View.GONE
         undoButton.visibility = View.GONE
 
@@ -133,7 +150,7 @@ class EditingActivity : AppCompatActivity() {
         scalingText.visibility = View.GONE
         retouchText.visibility = View.GONE
         segmentationText.visibility = View.GONE
-        filtrationText.visibility = View.GONE
+        unsharpMaskingText.visibility = View.GONE
         saveText.visibility = View.GONE
         undoText.visibility = View.GONE
     }
@@ -149,7 +166,7 @@ class EditingActivity : AppCompatActivity() {
         scalingButton.visibility = View.VISIBLE
         retouchButton.visibility = View.VISIBLE
         segmentationButton.visibility = View.VISIBLE
-        filtrationButton.visibility = View.VISIBLE
+        unsharpMaskingButton.visibility = View.VISIBLE
         saveButton.visibility = View.VISIBLE
         undoButton.visibility = View.VISIBLE
 
@@ -158,7 +175,7 @@ class EditingActivity : AppCompatActivity() {
         scalingText.visibility = View.VISIBLE
         retouchText.visibility = View.VISIBLE
         segmentationText.visibility = View.VISIBLE
-        filtrationText.visibility = View.VISIBLE
+        unsharpMaskingText.visibility = View.VISIBLE
         saveText.visibility = View.VISIBLE
         undoText.visibility = View.VISIBLE
     }
@@ -868,6 +885,148 @@ class EditingActivity : AppCompatActivity() {
                 Color.argb(pixelAlpha, pixelRed, pixelGreen, pixelBlue))
         }
         return image
+    }
+
+    private fun unsharpMasking(amount: Float, threshold: Int, radius: Int, image: Bitmap):Bitmap {
+        var red = 0
+        var green = 0
+        var blue = 0
+        var blurredRed = 0
+        var blurredGreen = 0
+        var blurredBlue = 0
+        var unsMaskPixel = 0
+        val alpha = -0x1000000
+        val pixels = IntArray(image.width*image.height)
+        image.getPixels(pixels, 0, image.width, 0, 0, image.width, image.height)
+        val imageBlurred = blurring(image, radius)
+        val temp = IntArray(imageBlurred!!.width*imageBlurred.height)
+        imageBlurred.getPixels(temp, 0, imageBlurred.width, 0, 0, imageBlurred.width, imageBlurred.height)
+
+        for (i in 0 until image.height) {
+            for (j in 0 until image.width) {
+
+                val originalPixel = pixels[i*image.width+j]
+                val blurredPixel = temp[i*imageBlurred.width+j]
+                red = originalPixel shr 16 and 0xff
+                green = originalPixel shr 8 and 0xff
+                blue = originalPixel and 0xff
+                blurredRed = blurredPixel shr 16 and 0xff
+                blurredGreen = blurredPixel shr 8 and 0xff
+                blurredBlue = blurredPixel and 0xff
+
+                if (abs(red - blurredRed) >= threshold) {
+                    red = (amount * (red - blurredRed) + red).toInt()
+                    red = if (red > 255) 255 else if (red < 0) 0 else red
+                }
+                if (abs(green - blurredGreen) >= threshold) {
+                    green = (amount * (green - blurredGreen) + green).toInt()
+                    green = if (green > 255) 255 else if (green < 0) 0 else green
+                }
+                if (abs(blue - blurredBlue) >= threshold) {
+                    blue  = (amount * (blue - blurredBlue) + blue ).toInt()
+                    blue  = if (blue  > 255) 255 else if (blue  < 0) 0 else blue
+                }
+                unsMaskPixel = alpha or (red shl 16) or (green shl 8) or blue
+                temp[i*image.width+j] = unsMaskPixel
+            }
+            }
+        return Bitmap.createBitmap(temp, image.width, image.height, Bitmap.Config.ARGB_8888)
+
+    }
+    private fun blurring(image: Bitmap, radius: Int): Bitmap? {
+        assert(radius and 1 == 0) { "Range must be odd." }
+        val blurredImage = Bitmap.createBitmap(image.width, image.height, Bitmap.Config.ARGB_8888)
+        val c = Canvas(blurredImage)
+        val width = image.width
+        val height = image.height
+        val pixels = IntArray(image.width * image.height)
+        image.getPixels(pixels, 0, width, 0, 0, width, height)
+        blurringHorizontal(pixels, width, height, radius / 2)
+        boxBlurVertical(pixels, width, height, radius / 2)
+        c.drawBitmap(pixels, 0, width, 0.0f, 0.0f, width, height, true, null)
+        return blurredImage
+    }
+
+    private fun blurringHorizontal(pixels: IntArray, width: Int, height: Int, halfRange: Int) {
+        var index = 0
+        val newColors = IntArray(width)
+        for (y in 0 until height) {
+            var hits = 0
+            var red: Long = 0
+            var green: Long = 0
+            var blue: Long = 0
+            for (x in -halfRange until width) {
+                val oldPixel = x - halfRange - 1
+                if (oldPixel >= 0) {
+                    val color = pixels[index + oldPixel]
+                    if (color != 0) {
+                        red -= Color.red(color).toLong()
+                        green -= Color.green(color).toLong()
+                        blue -= Color.blue(color).toLong()
+                    }
+                    hits--
+                }
+                val newPixel = x + halfRange
+                if (newPixel < width) {
+                    val color = pixels[index + newPixel]
+                    if (color != 0) {
+                        red += Color.red(color).toLong()
+                        green += Color.green(color).toLong()
+                        blue += Color.blue(color).toLong()
+                    }
+                    hits++
+                }
+                if (x >= 0) {
+                    newColors[x] = Color.argb(0xFF, (red / hits).toInt(), (green / hits).toInt(), (blue / hits).toInt())
+                }
+            }
+            for (x in 0 until width) {
+                pixels[index + x] = newColors[x]
+            }
+            index += width
+        }
+    }
+
+    private fun boxBlurVertical(pixels: IntArray, width: Int, height: Int, halfRange: Int) {
+        val newColors = IntArray(height)
+        val oldPixelOffset = -(halfRange + 1) * width
+        val newPixelOffset = halfRange * width
+        for (x in 0 until width) {
+            var hits = 0
+            var red: Long = 0
+            var green: Long = 0
+            var blue: Long = 0
+            var index = -halfRange * width + x
+            for (y in -halfRange until height) {
+                val oldPixel = y - halfRange - 1
+                if (oldPixel >= 0) {
+                    val color = pixels[index + oldPixelOffset]
+                    if (color != 0) {
+                        red -= Color.red(color).toLong()
+                        green -= Color.green(color).toLong()
+                        blue -= Color.blue(color).toLong()
+                    }
+                    hits--
+                }
+                val newPixel = y + halfRange
+                if (newPixel < height) {
+                    val color = pixels[index + newPixelOffset]
+                    if (color != 0) {
+                        red += Color.red(color).toLong()
+                        green += Color.green(color).toLong()
+                        blue += Color.blue(color).toLong()
+                    }
+                    hits++
+                }
+                if (y >= 0) {
+                    newColors[y] = Color.argb(0xFF, (red / hits).toInt(), (green / hits).toInt(), (blue / hits).toInt())
+                }
+                index += width
+            }
+            for (y in 0 until height) {
+                pixels[y * width + x] = newColors[y]
+            }
+        }
     }
 }
 
