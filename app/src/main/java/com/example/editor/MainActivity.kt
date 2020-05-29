@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -19,55 +18,57 @@ class MainActivity : AppCompatActivity() {
     private val PERMISSION_CODE_GALLERY = 1000
     private val IMAGE_CAPTURE_CODE = 1001
     private val IMAGE_PICK_CODE = 1002
-    var image_uri: Uri? = null
+    var imageUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        //нажатие кнопки камеры
+        //----------нажатие кнопки куба
+        cubeButton.setOnClickListener {
+            Toast.makeText(this@MainActivity, "Функция в стадии разработки", Toast.LENGTH_SHORT).show()
+        }
+
+        //----------нажатие кнопки камеры
         cameraButton.setOnClickListener {
-            //if android version is Marshmallow and above
+            // версия android >= Marshmallow
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (checkSelfPermission(android.Manifest.permission.CAMERA)
                     == PackageManager.PERMISSION_DENIED || checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_DENIED
                 ) {
-                    //permission was not enable
                     val permission = arrayOf(
                         android.Manifest.permission.CAMERA,
                         android.Manifest.permission.WRITE_EXTERNAL_STORAGE
                     )
-                    //show pop-up to request permission
                     requestPermissions(permission, PERMISSION_CODE_CAMERA)
                 } else {
-                    //permission was granted
                     openCamera()
                 }
             }
             else {
-                //android version < Marshmallow
+                // версия android < Marshmallow
                 openCamera()
             }
         }
 
-        //нажатие кнопки галереи
+        //----------нажатие кнопки галереи
         galleryButton.setOnClickListener {
             //check runtime permission
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
                 if (checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) ==
                     PackageManager.PERMISSION_DENIED){
-                    //запрос отклонен
+                    // запрос отклонен
                     val permissions = arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE);
                     requestPermissions(permissions, PERMISSION_CODE_GALLERY);
                 }
                 else{
-                    //запрос уже принят
+                    // запрос уже принят
                     pickImageFromGallery();
                 }
             }
             else{
-                //OС меньше Marshmallow
+                // версия android < Marshmallow
                 pickImageFromGallery();
             }
         }
@@ -78,9 +79,9 @@ class MainActivity : AppCompatActivity() {
         val values = ContentValues()
         values.put(MediaStore.Images.Media.TITLE, "New picture")
         values.put(MediaStore.Images.Media.DESCRIPTION, "From the Camera")
-        image_uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+        imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, image_uri)
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri)
         startActivityForResult(cameraIntent, IMAGE_CAPTURE_CODE)
     }
 
@@ -96,7 +97,7 @@ class MainActivity : AppCompatActivity() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        //вызывается, когда пользователь принимает/отклоняет запрос
+        // вызывается, когда пользователь принимает/отклоняет запрос
         when (requestCode) {
             PERMISSION_CODE_CAMERA -> {
                 if (grantResults.size > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -127,13 +128,13 @@ class MainActivity : AppCompatActivity() {
         if (resultCode == Activity.RESULT_OK && requestCode == IMAGE_CAPTURE_CODE) {
             //создание нового активити и переход к нему
             val newActivityIntent = Intent(this, EditingActivity::class.java)
-            newActivityIntent.putExtra("imageUri", image_uri.toString())
+            newActivityIntent.putExtra("imageUri", imageUri.toString())
             startActivity(newActivityIntent)
         }
         else if (resultCode == Activity.RESULT_OK && requestCode == IMAGE_PICK_CODE) {
-            image_uri = data?.data
+            imageUri = data?.data
             val newActivityIntent = Intent(this, EditingActivity::class.java)
-            newActivityIntent.putExtra("imageUri", image_uri.toString())
+            newActivityIntent.putExtra("imageUri", imageUri.toString())
             startActivity(newActivityIntent)
         }
     }
