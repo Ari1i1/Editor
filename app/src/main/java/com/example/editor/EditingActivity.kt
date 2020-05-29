@@ -36,13 +36,17 @@ class EditingActivity : AppCompatActivity() {
 
         seekBarInvisible()
         progressBarInvisible()
+        allowInvisible()
+        cancelInvisible()
 
         //--------поворот изображения
         rotateButton.setOnClickListener {
-            rotate()
+            val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
+            rotate(image)
         }
         rotateText.setOnClickListener {
-            rotate()
+            val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
+            rotate(image)
         }
 
         //--------сохранение изображения
@@ -63,26 +67,48 @@ class EditingActivity : AppCompatActivity() {
 
         //--------эффекты
         effectsButton.setOnClickListener {
-            effects()
+            val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
+            effects(image)
         }
         effectsText.setOnClickListener {
-            effects()
+            val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
+            effects(image)
         }
 
         //--------масштабирование
         scalingButton.setOnClickListener {
-            scaling()
+            val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
+            scaling(image)
         }
         scalingText.setOnClickListener {
-            scaling()
+            val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
+            scaling(image)
         }
 
         //--------ретушь
         retouchButton.setOnClickListener {
             retouch()
+            Toast.makeText(this@EditingActivity, "Функция в стадии разработки", Toast.LENGTH_SHORT).show()
         }
         retouchText.setOnClickListener {
             retouch()
+            Toast.makeText(this@EditingActivity, "Функция в стадии разработки", Toast.LENGTH_SHORT).show()
+        }
+
+        //--------сегментация
+        segmentationButton.setOnClickListener {
+            Toast.makeText(this@EditingActivity, "Функция в стадии разработки", Toast.LENGTH_SHORT).show()
+        }
+        segmentationText.setOnClickListener {
+            Toast.makeText(this@EditingActivity, "Функция в стадии разработки", Toast.LENGTH_SHORT).show()
+        }
+
+        //--------билин., трилин. фильтрация
+        filtrationButton.setOnClickListener {
+            Toast.makeText(this@EditingActivity, "Функция в стадии разработки", Toast.LENGTH_SHORT).show()
+        }
+        filtrationText.setOnClickListener {
+            Toast.makeText(this@EditingActivity, "Функция в стадии разработки", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -145,13 +171,48 @@ class EditingActivity : AppCompatActivity() {
         progressBar.visibility = View.GONE
     }
 
+    // активность кнопок подтверждения/отмены
+    private fun allowVisible() {
+        allowButton.visibility = View.VISIBLE
+    }
+    private fun cancelVisible() {
+        cancelButton.visibility = View.VISIBLE
+    }
+
+    private fun allowInvisible() {
+        allowButton.visibility = View.GONE
+    }
+    private fun cancelInvisible() {
+        cancelButton.visibility = View.GONE
+    }
+
     //----------поворот изображения
-    private fun rotate() {
+    private fun rotate(originalImage: Bitmap) {
+        var rotatedImage: Bitmap = originalImage
+
+        cancelVisible()
         buttonsInvisible()
         seekBarVisible()
         seekBar.max = 0
         seekBar.max = 360
         seekBar.progress = 180
+
+        cancelButton.setOnClickListener {
+            imageView.setImageBitmap(originalImage)
+            seekBarInvisible()
+            progressBarInvisible()
+            buttonsVisible()
+            cancelInvisible()
+            allowInvisible()
+        }
+        allowButton.setOnClickListener {
+            imageView.setImageBitmap(rotatedImage)
+            seekBarInvisible()
+            progressBarInvisible()
+            buttonsVisible()
+            cancelInvisible()
+            allowInvisible()
+        }
 
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seek: SeekBar, progess: Int, fromUser: Boolean) {
@@ -166,16 +227,18 @@ class EditingActivity : AppCompatActivity() {
                 seekBarInvisible()
 
                 doAsync {
-                    val rotatedImage = rotation(seekBar.progress - 180)
+                    cancelInvisible()
+                    rotatedImage = rotation(seekBar.progress - 180)
 
                     uiThread {
                         imageView.setImageBitmap(rotatedImage)
-                        seekBarInvisible()
                         progressBarInvisible()
-                        buttonsVisible()
+                        allowVisible()
+                        cancelVisible()
+                        seekBarVisible()
                         Toast.makeText(
                             this@EditingActivity,
-                            "Выполнен поворот на " + (seek.progress - 180) + "°",
+                            "Выполнен поворот на " + (seekBar.progress - 180) + "°",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -183,7 +246,7 @@ class EditingActivity : AppCompatActivity() {
             }
         })
     }
-    //алгоритм поворота
+    // алгоритм поворота
     private fun rotation(angleStart: Int): Bitmap {
         val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
         val width: Int = image.width
@@ -218,19 +281,19 @@ class EditingActivity : AppCompatActivity() {
         }
         else {
             for (y in 0 until width) {
-                for (x in 0 until height){
-                    val a = x - midY
-                    val b = y - midX
-                    val xx = (+a * cos - b * sin + midX).toInt()
-                    val yy = (+a * sin + b * cos + midY).toInt()
-                    if (xx in 0 until width && yy >= 0 && yy < height) {
-                        newPixelsArray[y*height+x] = pixelsArray[yy*width+xx]
-                    } else {
-                        newPixelsArray[y*height+x]  = Color.argb(100, 0, 0, 0)
-                    }
+            for (x in 0 until height){
+                val a = x - midY
+                val b = y - midX
+                val xx = (+a * cos - b * sin + midX).toInt()
+                val yy = (+a * sin + b * cos + midY).toInt()
+                if (xx in 0 until width && yy >= 0 && yy < height) {
+                    newPixelsArray[y*height+x] = pixelsArray[yy*width+xx]
+                } else {
+                    newPixelsArray[y*height+x]  = Color.argb(100, 0, 0, 0)
                 }
             }
-            return Bitmap.createBitmap(newPixelsArray, height, width, image.config)
+        }
+        return Bitmap.createBitmap(newPixelsArray, height, width, image.config)
         }
     }
 
@@ -245,7 +308,7 @@ class EditingActivity : AppCompatActivity() {
             val time = Time()
             time.setToNow()
             val externalStorageState = Environment.getExternalStorageState()
-            if (externalStorageState.equals(Environment.MEDIA_MOUNTED)) {
+            if (externalStorageState == Environment.MEDIA_MOUNTED) {
                 val storageDirectory = Environment.getExternalStorageDirectory().toString()
                 val file = File(
                     storageDirectory,
@@ -294,9 +357,26 @@ class EditingActivity : AppCompatActivity() {
     }
 
     //----------эффекты
-    private fun effects() {
+    private fun effects(originalImage: Bitmap) {
         val menu = PopupMenu(this, effectsButton)
         menu.inflate(R.menu.effects_menu)
+
+        var editedImage: Bitmap = originalImage
+
+        cancelButton.setOnClickListener {
+            imageView.setImageBitmap(originalImage)
+            progressBarInvisible()
+            buttonsVisible()
+            cancelInvisible()
+            allowInvisible()
+        }
+        allowButton.setOnClickListener {
+            imageView.setImageBitmap(editedImage)
+            progressBarInvisible()
+            buttonsVisible()
+            cancelInvisible()
+            allowInvisible()
+        }
 
         menu.setOnMenuItemClickListener {
             when (it.itemId) {
@@ -304,6 +384,7 @@ class EditingActivity : AppCompatActivity() {
                 R.id.effect1 -> {
                     buttonsInvisible()
                     progressBarVisible()
+                    cancelVisible()
                     val image = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
                     val height = image.height
@@ -313,6 +394,7 @@ class EditingActivity : AppCompatActivity() {
                     val newPixelsArray = IntArray(width * height)
 
                     doAsync {
+                        cancelInvisible()
                         for (y in 0 until height) {
                             for (x in 0 until width) {
                                 val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
@@ -324,14 +406,16 @@ class EditingActivity : AppCompatActivity() {
                             }
                         }
                         uiThread {
-                            imageView.setImageBitmap(Bitmap.createBitmap(newPixelsArray, width, height, image.config))
+                            editedImage = Bitmap.createBitmap(newPixelsArray, width, height, image.config)
+                            imageView.setImageBitmap(editedImage)
                             progressBarInvisible()
-                            buttonsVisible()
+                            effectsButton.visibility = View.VISIBLE
+                            cancelVisible()
+                            allowVisible()
                             Toast.makeText(
                                 this@EditingActivity,
                                 "Применен эффект Неоновый розовый",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                                Toast.LENGTH_SHORT).show()
                         }
                     }
                     true
@@ -340,6 +424,7 @@ class EditingActivity : AppCompatActivity() {
                 R.id.effect2 -> {
                     buttonsInvisible()
                     progressBarVisible()
+                    cancelVisible()
                     val image = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
                     val height = image.height
@@ -349,6 +434,7 @@ class EditingActivity : AppCompatActivity() {
                     val newPixelsArray = IntArray(width * height)
 
                     doAsync {
+                        cancelInvisible()
                         for (y in 0 until height) {
                             for (x in 0 until width) {
                                 var pixelAlpha = Color.alpha(pixelsArray[y*width+x])
@@ -370,14 +456,16 @@ class EditingActivity : AppCompatActivity() {
                             }
                         }
                         uiThread {
-                            imageView.setImageBitmap(Bitmap.createBitmap(newPixelsArray, width, height, image.config))
+                            editedImage = Bitmap.createBitmap(newPixelsArray, width, height, image.config)
+                            imageView.setImageBitmap(editedImage)
                             progressBarInvisible()
-                            buttonsVisible()
+                            effectsButton.visibility = View.VISIBLE
+                            cancelVisible()
+                            allowVisible()
                             Toast.makeText(
                                 this@EditingActivity,
                                 "Применен эффект Розовый",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                                Toast.LENGTH_SHORT).show()
                         }
                     }
                     true
@@ -386,6 +474,7 @@ class EditingActivity : AppCompatActivity() {
                 R.id.effect3 -> {
                     buttonsInvisible()
                     progressBarVisible()
+                    cancelVisible()
                     val image = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
                     val height = image.height
@@ -395,6 +484,7 @@ class EditingActivity : AppCompatActivity() {
                     val newPixelsArray = IntArray(width * height)
 
                     doAsync {
+                        cancelInvisible()
                         for (y in 0 until height) {
                             for (x in 0 until width) {
                                 val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
@@ -408,14 +498,16 @@ class EditingActivity : AppCompatActivity() {
                             }
                         }
                         uiThread {
-                            imageView.setImageBitmap(Bitmap.createBitmap(newPixelsArray, width, height, image.config))
+                            editedImage = Bitmap.createBitmap(newPixelsArray, width, height, image.config)
+                            imageView.setImageBitmap(editedImage)
                             progressBarInvisible()
-                            buttonsVisible()
+                            effectsButton.visibility = View.VISIBLE
+                            cancelVisible()
+                            allowVisible()
                             Toast.makeText(
                                 this@EditingActivity,
                                 "Применен эффект Черно-белый 1",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                                Toast.LENGTH_SHORT).show()
                         }
                     }
                     true
@@ -424,6 +516,7 @@ class EditingActivity : AppCompatActivity() {
                 R.id.effect4 -> {
                     buttonsInvisible()
                     progressBarVisible()
+                    cancelVisible()
                     val image = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
                     val height = image.height
@@ -433,6 +526,7 @@ class EditingActivity : AppCompatActivity() {
                     val newPixelsArray = IntArray(width * height)
 
                     doAsync {
+                        cancelInvisible()
                         for (y in 0 until height) {
                             for (x in 0 until width) {
                                 val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
@@ -454,14 +548,16 @@ class EditingActivity : AppCompatActivity() {
                             }
                         }
                         uiThread {
-                            imageView.setImageBitmap(Bitmap.createBitmap(newPixelsArray, width, height, image.config))
+                            editedImage = Bitmap.createBitmap(newPixelsArray, width, height, image.config)
+                            imageView.setImageBitmap(editedImage)
                             progressBarInvisible()
-                            buttonsVisible()
+                            effectsButton.visibility = View.VISIBLE
+                            cancelVisible()
+                            allowVisible()
                             Toast.makeText(
                                 this@EditingActivity,
                                 "Применен эффект Черно-белый 2",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                                Toast.LENGTH_SHORT).show()
                         }
                     }
                     true
@@ -470,6 +566,7 @@ class EditingActivity : AppCompatActivity() {
                 R.id.effect5 -> {
                     buttonsInvisible()
                     progressBarVisible()
+                    cancelVisible()
                     val image = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
                     val height = image.height
@@ -479,6 +576,7 @@ class EditingActivity : AppCompatActivity() {
                     val newPixelsArray = IntArray(width * height)
 
                     doAsync {
+                        cancelInvisible()
                         for (y in 0 until height) {
                             for (x in 0 until width) {
                                 val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
@@ -491,14 +589,16 @@ class EditingActivity : AppCompatActivity() {
                             }
                         }
                         uiThread {
-                            imageView.setImageBitmap(Bitmap.createBitmap(newPixelsArray, width, height, image.config))
+                            editedImage = Bitmap.createBitmap(newPixelsArray, width, height, image.config)
+                            imageView.setImageBitmap(editedImage)
                             progressBarInvisible()
-                            buttonsVisible()
+                            effectsButton.visibility = View.VISIBLE
+                            cancelVisible()
+                            allowVisible()
                             Toast.makeText(
                                 this@EditingActivity,
                                 "Применен эффект Негатив",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                                Toast.LENGTH_SHORT).show()
                         }
                     }
                     true
@@ -507,6 +607,7 @@ class EditingActivity : AppCompatActivity() {
                 R.id.effect6 -> {
                     buttonsInvisible()
                     progressBarVisible()
+                    cancelVisible()
                     val image = (imageView.drawable as BitmapDrawable).bitmap
                     val width = image.width
                     val height = image.height
@@ -516,6 +617,7 @@ class EditingActivity : AppCompatActivity() {
                     val newPixelsArray = IntArray(width * height)
 
                     doAsync {
+                        cancelInvisible()
                         for (y in 0 until height) {
                             for (x in 0 until width) {
                                 val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
@@ -536,14 +638,16 @@ class EditingActivity : AppCompatActivity() {
                             }
                         }
                         uiThread {
-                            imageView.setImageBitmap(Bitmap.createBitmap(newPixelsArray, width, height, image.config))
+                            editedImage = Bitmap.createBitmap(newPixelsArray, width, height, image.config)
+                            imageView.setImageBitmap(editedImage)
                             progressBarInvisible()
-                            buttonsVisible()
+                            effectsButton.visibility = View.VISIBLE
+                            cancelVisible()
+                            allowVisible()
                             Toast.makeText(
                                 this@EditingActivity,
                                 "Применен эффект Сепия",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                                Toast.LENGTH_SHORT).show()
                         }
                     }
                     true
@@ -555,13 +659,33 @@ class EditingActivity : AppCompatActivity() {
     }
 
     //----------масштабирование
-    private fun scaling() {
+    private fun scaling(originalImage: Bitmap) {
+        var scaledImage: Bitmap = originalImage
+
         buttonsInvisible()
         seekBarVisible()
+        cancelVisible()
         seekBar.max = 0
         seekBar.max = 200
         seekBar.progress = 100
         degrees.text = "100%"
+
+        cancelButton.setOnClickListener {
+            imageView.setImageBitmap(originalImage)
+            seekBarInvisible()
+            progressBarInvisible()
+            buttonsVisible()
+            cancelInvisible()
+            allowInvisible()
+        }
+        allowButton.setOnClickListener {
+            imageView.setImageBitmap(scaledImage)
+            seekBarInvisible()
+            progressBarInvisible()
+            buttonsVisible()
+            cancelInvisible()
+            allowInvisible()
+        }
 
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seek: SeekBar, progess: Int, fromUser: Boolean) {
@@ -576,25 +700,27 @@ class EditingActivity : AppCompatActivity() {
                 seekBarInvisible()
 
                 doAsync {
-                    val scaledImage = bilinearInterpolation((seek.progress).toDouble() / 100)
+                    cancelInvisible()
+                    scaledImage = bilinearInterpolation((seek.progress).toDouble() / 100)
 
                     uiThread {
-                        //imageView.setImageBitmap(scaledImage)
                         imageView.setImageBitmap(scaledImage)
-                        seekBarInvisible()
                         progressBarInvisible()
-                        buttonsVisible()
-                        if (seek.progress > 100) {
+                        allowVisible()
+                        cancelVisible()
+                        seekBarVisible()
+                        if (seekBar.progress > 100) {
                             Toast.makeText(
                                 this@EditingActivity,
-                                "Изображение увеличено на " + (seek.progress - 100) + "%",
-                                Toast.LENGTH_SHORT).show()
-                        }
-                        else {
+                                "Изображение увеличено на " + (seekBar.progress - 100) + "%",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
                             Toast.makeText(
                                 this@EditingActivity,
-                                "Изображение уменьшено на " + (100 - seek.progress) + "%",
-                                Toast.LENGTH_SHORT).show()
+                                "Изображение уменьшено на " + (100 - seekBar.progress) + "%",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                 }
@@ -628,8 +754,8 @@ class EditingActivity : AppCompatActivity() {
 
         val xRatio = (width1 - 1).toFloat() / width2
         val yRatio = (height1 - 1).toFloat() / height2
-        var xDiff: Float
-        var yDiff: Float
+        var xDif: Float
+        var yDif: Float
         var blue: Float
         var red: Float
         var green: Float
@@ -639,25 +765,25 @@ class EditingActivity : AppCompatActivity() {
             for (j in 0 until width2) {
                 x = (xRatio * j).toInt()
                 y = (yRatio * i).toInt()
-                xDiff = xRatio * j - x
-                yDiff = yRatio * i - y
+                xDif = xRatio * j - x
+                yDif = yRatio * i - y
                 index = y * width1 + x
                 a = pixelsArray[index]
                 b = pixelsArray[index + 1]
                 c = pixelsArray[index + width1]
                 d = pixelsArray[index + width1 + 1]
 
-                blue = (a and 0xff) * (1 - xDiff) * (1 - yDiff) + (b and 0xff) *
-                        xDiff * (1 - yDiff) + (c and 0xff) * yDiff *
-                        (1 - xDiff) + (d and 0xff) * (xDiff * yDiff)
+                blue = (a and 0xff) * (1 - xDif) * (1 - yDif) + (b and 0xff) *
+                        xDif * (1 - yDif) + (c and 0xff) * yDif *
+                        (1 - xDif) + (d and 0xff) * (xDif * yDif)
 
-                green = (a shr 8 and 0xff) * (1 - xDiff) * (1 - yDiff) + (b shr 8 and 0xff) *
-                        xDiff * (1 - yDiff) + (c shr 8 and 0xff) * yDiff * (1 - xDiff) +
-                        (d shr 8 and 0xff) * (xDiff * yDiff)
+                green = (a shr 8 and 0xff) * (1 - xDif) * (1 - yDif) + (b shr 8 and 0xff) *
+                        xDif * (1 - yDif) + (c shr 8 and 0xff) * yDif * (1 - xDif) +
+                        (d shr 8 and 0xff) * (xDif * yDif)
 
-                red = (a shr 16 and 0xff) * (1 - xDiff) * (1 - yDiff) + (b shr 16 and 0xff) *
-                        xDiff * (1 - yDiff) + (c shr 16 and 0xff) * yDiff * (1 - xDiff) +
-                        (d shr 16 and 0xff) * (xDiff * yDiff)
+                red = (a shr 16 and 0xff) * (1 - xDif) * (1 - yDif) + (b shr 16 and 0xff) *
+                        xDif * (1 - yDif) + (c shr 16 and 0xff) * yDif * (1 - xDif) +
+                        (d shr 16 and 0xff) * (xDif * yDif)
 
                 newPixelsArray[offset++] = -0x1000000 or
                         (red.toInt() shl 16 and 0xff0000) or
@@ -670,81 +796,80 @@ class EditingActivity : AppCompatActivity() {
 
     //----------ретуширование
     private fun retouch() {
-
         val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
         val s = 10000
         val xCoordinates = IntArray(s)
         val yCoordinates = IntArray(s)
         val pixelValue = IntArray(s)
         var count = 0
-        imageView.setOnTouchListener { v, event ->
-            var x = event.x.toInt()
-            var y = event.y.toInt()
-            for (i in 0 until 21)
-                for (j in 0 until 21) {
-                    if (x in 0 until image.width)
-                        if (y in 0 until image.height) {
-                            x = x - 10 + i
-                            y = y - 10 + j
-                            xCoordinates[count] = x
-                            yCoordinates[count] = y
-                            pixelValue[count] = image.getPixel(x, y)
-                            count += 1
+        var editingImage: Bitmap = image
+        buttonsInvisible()
+
+        doAsync {
+            imageView.setOnTouchListener { imageView, event ->
+                ///алгоритм
+                var x = event.x.toInt()
+                var y = event.y.toInt()
+                if (x >= 0 && x < image.width) {
+                    if (y >= 0 && y < image.height) {
+                        for (i in 0 until 21) {
+                            for (j in 0 until 21) {
+                                x = x - 10 + i
+                                y = y - 10 + j
+                                xCoordinates[count] = x
+                                yCoordinates[count] = y
+                                pixelValue[count] = image.getPixel(x, y)
+                                count++
+                            }
                         }
+                    }
                 }
-            when (event.action) {
-                MotionEvent.ACTION_UP -> retouchAlg(image, count)
-                else -> {
+                when (event!!.action) {
+                    MotionEvent.ACTION_UP -> {
+                        editingImage = retouchAlg(image, pixelValue, count, xCoordinates, yCoordinates)
+                    }
+                    else -> {
+                    }
                 }
+                imageView.onTouchEvent(event)
             }
-            true
+            uiThread {
+                imageView.setImageBitmap(editingImage)
+                progressBarInvisible()
+                buttonsVisible()
+                Toast.makeText(this@EditingActivity, "Выполнена ретушь", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
-    private fun retouchAlg(image: Bitmap, count: Int) {
-        val width = count
-        val height = count
-        val editedImage = Bitmap.createBitmap(width, height, image.config)
-        val size = width * height
-        for (xx in 0 until count) {
-            for (yy in 0 until count) {
-                var pixelAlpha: Int = 0
-                var pixelRed: Int = 0
-                var pixelGreen: Int = 0
-                var pixelBlue: Int = 0
-                var pixelColor: Int
-                for (x in 0 until count) {
-                    for (y in 0 until count) {
-                        pixelColor = image.getPixel(x, y)
-                        pixelAlpha += Color.alpha(pixelColor)
-                        pixelRed += Color.red(pixelColor)
-                        pixelGreen += Color.green(pixelColor)
-                        pixelBlue += Color.blue(pixelColor)
-                    }
-                }
-                pixelAlpha /= size
-                pixelRed /= size
-                pixelGreen /= size
-                pixelBlue /= size
-                for (x in 0 until count) {
-                    for (y in 0 until count) {
-                        editedImage.setPixel(
-                            x,
-                            y,
-                            Color.argb(pixelAlpha, pixelRed, pixelGreen, pixelBlue)
-                        )
-                    }
-                }
-            }
+    private fun retouchAlg(image: Bitmap, pixelValue: IntArray, count: Int,
+                           xCoordinates: IntArray, yCoordinates: IntArray): Bitmap {
+        var pixelAlpha = 0
+        var pixelRed = 0
+        var pixelGreen = 0
+        var pixelBlue = 0
+        var pixelColor: Int
+
+        for (i in 0 until count) {
+            pixelColor = pixelValue[i]
+            pixelAlpha += Color.alpha(pixelColor)
+            pixelRed += Color.red(pixelColor)
+            pixelGreen += Color.green(pixelColor)
+            pixelBlue += Color.blue(pixelColor)
         }
-        imageView.setImageBitmap(editedImage)
-        Toast.makeText(this, "Выполнена ретушь", Toast.LENGTH_SHORT).show()
-        true
+
+        pixelAlpha /= count
+        pixelRed /= count
+        pixelGreen /= count
+        pixelBlue /= count
+
+        for (i in 0 until count) {
+            image.setPixel(xCoordinates[i], yCoordinates[i],
+                Color.argb(pixelAlpha, pixelRed, pixelGreen, pixelBlue))
+        }
+        return image
     }
-
-
 }
-
 
 
 

@@ -143,6 +143,34 @@
         app:layout_constraintVertical_bias="0.0"
         app:srcCompat="@drawable/ic_undo" />
 
+    <ImageButton
+        android:id="@+id/allowButton"
+        android:layout_width="60dp"
+        android:layout_height="55dp"
+        android:backgroundTint="#00FFFFFF"
+        android:tint="@color/colorAccent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.769"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/ic_allow" />
+
+    <ImageButton
+        android:id="@+id/cancelButton"
+        android:layout_width="60dp"
+        android:layout_height="55dp"
+        android:backgroundTint="#00FFFFFF"
+        android:tint="@color/colorAccent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.985"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/ic_cancel" />
+
     <TextView
         android:id="@+id/effectsText"
         android:layout_width="66dp"
