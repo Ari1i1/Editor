@@ -1,7 +1,7 @@
 package com.example.editor
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
@@ -19,8 +19,8 @@ import org.jetbrains.anko.doAsync
 import org.jetbrains.anko.uiThread
 import java.io.File
 import java.io.FileOutputStream
-import java.io.InputStream
 import java.io.OutputStream
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -33,15 +33,8 @@ class EditingActivity : AppCompatActivity() {
 
         val uriString: String? = intent.getStringExtra("imageUri")
         val uri = Uri.parse(uriString)
-
-        val `is`: InputStream? = contentResolver.openInputStream(uri)
-        val startOriginal = BitmapFactory.decodeStream(`is`)
-        `is`!!.close()
-        val startCompressed: Bitmap = bilinearInterpolation(startOriginal, 0.5)
-
-        var editableOriginal: Bitmap = startOriginal
-
-        imageView.setImageBitmap(startCompressed)
+        imageView.setImageURI(uri)
+        val startImage: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
 
         seekBarInvisible()
         progressBarInvisible()
@@ -51,47 +44,47 @@ class EditingActivity : AppCompatActivity() {
         //--------поворот изображения
         rotateButton.setOnClickListener {
             val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
-            editableOriginal = rotate(image, editableOriginal)
+            rotate(image)
         }
         rotateText.setOnClickListener {
             val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
-            editableOriginal = rotate(image, editableOriginal)
+            rotate(image)
         }
 
         //--------сохранение изображения
         saveButton.setOnClickListener {
-            save(editableOriginal)
+            save()
         }
         saveText.setOnClickListener {
-            save(editableOriginal)
+            save()
         }
 
         //--------сброс изменений
         undoButton.setOnClickListener {
-            editableOriginal = undo(startOriginal, startCompressed)
+            undo(startImage)
         }
         undoText.setOnClickListener {
-            editableOriginal = undo(startOriginal, startCompressed)
+            undo(startImage)
         }
 
         //--------эффекты
         effectsButton.setOnClickListener {
             val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
-            editableOriginal = effects(image, editableOriginal)
+            effects(image)
         }
         effectsText.setOnClickListener {
             val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
-            editableOriginal = effects(image, editableOriginal)
+            effects(image)
         }
 
         //--------масштабирование
         scalingButton.setOnClickListener {
             val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
-            editableOriginal = scaling(image, editableOriginal)
+            scaling(image)
         }
         scalingText.setOnClickListener {
             val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
-            editableOriginal = scaling(image, editableOriginal)
+            scaling(image)
         }
 
         //--------ретушь
@@ -113,11 +106,26 @@ class EditingActivity : AppCompatActivity() {
         }
 
         //--------билин., трилин. фильтрация
-        filtrationButton.setOnClickListener {
-            Toast.makeText(this@EditingActivity, "Функция в стадии разработки", Toast.LENGTH_SHORT).show()
+        unsharpMaskingButton.setOnClickListener {
+            val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
+            val amount: Float= 100.3567F
+            val threshold = 100
+            val radius = 100
+           val temp = unsharpMasking(amount, threshold, radius, image)
+//            val temp = blurring(image, radius)
+            imageView.setImageBitmap(temp)
+            Toast.makeText(this@EditingActivity, "Выполнено маскирование", Toast.LENGTH_SHORT).show()
         }
-        filtrationText.setOnClickListener {
-            Toast.makeText(this@EditingActivity, "Функция в стадии разработки", Toast.LENGTH_SHORT).show()
+        unsharpMaskingText.setOnClickListener {
+            val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
+            val amount: Float= 100.3567F
+            val threshold = 100
+            val radius = 100
+//            val temp = blurring(image, radius)
+            val temp = unsharpMasking(amount, threshold, radius, image)
+            imageView.setImageBitmap(temp)
+            Toast.makeText(this@EditingActivity, "Выполнено маскирование", Toast.LENGTH_SHORT).show()
+
         }
     }
 
@@ -133,7 +141,7 @@ class EditingActivity : AppCompatActivity() {
         scalingButton.visibility = View.GONE
         retouchButton.visibility = View.GONE
         segmentationButton.visibility = View.GONE
-        filtrationButton.visibility = View.GONE
+        unsharpMaskingButton.visibility = View.GONE
         saveButton.visibility = View.GONE
         undoButton.visibility = View.GONE
 
@@ -142,7 +150,7 @@ class EditingActivity : AppCompatActivity() {
         scalingText.visibility = View.GONE
         retouchText.visibility = View.GONE
         segmentationText.visibility = View.GONE
-        filtrationText.visibility = View.GONE
+        unsharpMaskingText.visibility = View.GONE
         saveText.visibility = View.GONE
         undoText.visibility = View.GONE
     }
@@ -158,7 +166,7 @@ class EditingActivity : AppCompatActivity() {
         scalingButton.visibility = View.VISIBLE
         retouchButton.visibility = View.VISIBLE
         segmentationButton.visibility = View.VISIBLE
-        filtrationButton.visibility = View.VISIBLE
+        unsharpMaskingButton.visibility = View.VISIBLE
         saveButton.visibility = View.VISIBLE
         undoButton.visibility = View.VISIBLE
 
@@ -167,7 +175,7 @@ class EditingActivity : AppCompatActivity() {
         scalingText.visibility = View.VISIBLE
         retouchText.visibility = View.VISIBLE
         segmentationText.visibility = View.VISIBLE
-        filtrationText.visibility = View.VISIBLE
+        unsharpMaskingText.visibility = View.VISIBLE
         saveText.visibility = View.VISIBLE
         undoText.visibility = View.VISIBLE
     }
@@ -195,16 +203,9 @@ class EditingActivity : AppCompatActivity() {
         cancelButton.visibility = View.GONE
     }
 
-    private fun bitmapToArray (image: Bitmap, width: Int, height: Int): IntArray {
-        val pixelsArray = IntArray(width * height)
-        image.getPixels(pixelsArray, 0, width, 0, 0, width, height)
-        return pixelsArray
-    }
-
     //----------поворот изображения
-    private fun rotate(compressed: Bitmap, original: Bitmap): Bitmap {
-        var rotatedOriginal: Bitmap = original
-        var rotatedCompressed: Bitmap = compressed
+    private fun rotate(originalImage: Bitmap) {
+        var rotatedImage: Bitmap = originalImage
 
         cancelVisible()
         buttonsInvisible()
@@ -212,10 +213,9 @@ class EditingActivity : AppCompatActivity() {
         seekBar.max = 0
         seekBar.max = 360
         seekBar.progress = 180
-        degrees.text = "0°"
 
         cancelButton.setOnClickListener {
-            imageView.setImageBitmap(compressed)
+            imageView.setImageBitmap(originalImage)
             seekBarInvisible()
             progressBarInvisible()
             buttonsVisible()
@@ -223,7 +223,7 @@ class EditingActivity : AppCompatActivity() {
             allowInvisible()
         }
         allowButton.setOnClickListener {
-            imageView.setImageBitmap(rotatedCompressed)
+            imageView.setImageBitmap(rotatedImage)
             seekBarInvisible()
             progressBarInvisible()
             buttonsVisible()
@@ -245,11 +245,10 @@ class EditingActivity : AppCompatActivity() {
 
                 doAsync {
                     cancelInvisible()
-                    rotatedCompressed = rotation(rotatedCompressed, seekBar.progress - 180)
-                    rotatedOriginal = rotation(rotatedOriginal, seekBar.progress - 180)
+                    rotatedImage = rotation(seekBar.progress - 180)
 
                     uiThread {
-                        imageView.setImageBitmap(rotatedCompressed)
+                        imageView.setImageBitmap(rotatedImage)
                         progressBarInvisible()
                         allowVisible()
                         cancelVisible()
@@ -263,10 +262,10 @@ class EditingActivity : AppCompatActivity() {
                 }
             }
         })
-        return rotatedOriginal
     }
     // алгоритм поворота
-    private fun rotation(image: Bitmap, angleStart: Int): Bitmap {
+    private fun rotation(angleStart: Int): Bitmap {
+        val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
         val width: Int = image.width
         val height: Int = image.height
 
@@ -316,12 +315,13 @@ class EditingActivity : AppCompatActivity() {
     }
 
     //----------сохранение изображения
-    private fun save(image: Bitmap) {
+    private fun save() {
         var temp = 0
         buttonsInvisible()
         progressBarVisible()
 
         doAsync {
+            val mainImage: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
             val time = Time()
             time.setToNow()
             val externalStorageState = Environment.getExternalStorageState()
@@ -335,7 +335,7 @@ class EditingActivity : AppCompatActivity() {
                 )
                 try {
                     val stream: OutputStream = FileOutputStream(file)
-                    image.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+                    mainImage.compress(Bitmap.CompressFormat.JPEG, 100, stream)
                     stream.flush()
                     stream.close()
                     temp = 1
@@ -367,29 +367,28 @@ class EditingActivity : AppCompatActivity() {
     }
 
     //----------сброс изменений
-    private fun undo(startOriginal: Bitmap, startCompressed: Bitmap): Bitmap {
-        imageView.setImageBitmap(startCompressed)
+    private fun undo(startImage: Bitmap) {
+        val image: Bitmap = startImage
+        imageView.setImageBitmap(image)
         Toast.makeText(this@EditingActivity, "Изменения отменены", Toast.LENGTH_SHORT).show()
-        return startOriginal
     }
 
     //----------эффекты
-    private fun effects(compressed: Bitmap, original: Bitmap): Bitmap {
+    private fun effects(originalImage: Bitmap) {
         val menu = PopupMenu(this, effectsButton)
         menu.inflate(R.menu.effects_menu)
 
-        var editedCompressed: Bitmap = compressed
-        var editedOriginal: Bitmap = original
+        var editedImage: Bitmap = originalImage
 
         cancelButton.setOnClickListener {
-            imageView.setImageBitmap(compressed)
-            editedOriginal = original
+            imageView.setImageBitmap(originalImage)
             progressBarInvisible()
             buttonsVisible()
             cancelInvisible()
             allowInvisible()
         }
         allowButton.setOnClickListener {
+            imageView.setImageBitmap(editedImage)
             progressBarInvisible()
             buttonsVisible()
             cancelInvisible()
@@ -402,42 +401,30 @@ class EditingActivity : AppCompatActivity() {
                 R.id.effect1 -> {
                     buttonsInvisible()
                     progressBarVisible()
+                    cancelVisible()
+                    val image = (imageView.drawable as BitmapDrawable).bitmap
+                    val width = image.width
+                    val height = image.height
+
+                    val pixelsArray = IntArray(width * height)
+                    image.getPixels(pixelsArray, 0, width, 0, 0, width, height)
+                    val newPixelsArray = IntArray(width * height)
 
                     doAsync {
-                        val width1 = editedCompressed.width
-                        val height1 = editedCompressed.height
-                        val pixelsArrayCompressed = bitmapToArray(editedCompressed, width1, height1)
-                        val newPixelsCompressed = IntArray(width1 * height1)
+                        cancelInvisible()
+                        for (y in 0 until height) {
+                            for (x in 0 until width) {
+                                val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
+                                val pixelRed = Color.red(pixelsArray[y*width+x])
+                                val pixelGreen = Color.green(pixelsArray[y*width+x])
+                                val pixelBlue = Color.blue(pixelsArray[y*width+x])
 
-                        val width2 = editedOriginal.width
-                        val height2 = editedOriginal.height
-                        val pixelsArrayOriginal: IntArray = bitmapToArray(editedOriginal, width2, height2)
-                        val newPixelsOriginal = IntArray(width2 * height2)
-
-                        for (y in 0 until height1) {
-                            for (x in 0 until width1) {
-                                val pixelAlpha = Color.alpha(pixelsArrayCompressed[y*width1+x])
-                                val pixelRed = Color.red(pixelsArrayCompressed[y*width1+x])
-                                val pixelGreen = Color.green(pixelsArrayCompressed[y*width1+x])
-                                val pixelBlue = Color.blue(pixelsArrayCompressed[y*width1+x])
-
-                                newPixelsCompressed[y*width1+x] = Color.argb(pixelAlpha, pixelBlue, pixelRed / 2, pixelGreen)
+                                newPixelsArray[y*width+x] = Color.argb(pixelAlpha, pixelBlue, pixelRed / 2, pixelGreen)
                             }
                         }
-                        for (y in 0 until height2) {
-                            for (x in 0 until width2) {
-                                val pixelAlpha = Color.alpha(pixelsArrayOriginal[y*width2+x])
-                                val pixelRed = Color.red(pixelsArrayOriginal[y*width2+x])
-                                val pixelGreen = Color.green(pixelsArrayOriginal[y*width2+x])
-                                val pixelBlue = Color.blue(pixelsArrayOriginal[y*width2+x])
-
-                                newPixelsOriginal[y*width2+x] = Color.argb(pixelAlpha, pixelBlue, pixelRed / 2, pixelGreen)
-                            }
-                        }
-                        editedOriginal = Bitmap.createBitmap(newPixelsOriginal, width2, height2, editedCompressed.config)
                         uiThread {
-                            editedCompressed = Bitmap.createBitmap(newPixelsCompressed, width1, height1, editedCompressed.config)
-                            imageView.setImageBitmap(editedCompressed)
+                            editedImage = Bitmap.createBitmap(newPixelsArray, width, height, image.config)
+                            imageView.setImageBitmap(editedImage)
                             progressBarInvisible()
                             effectsButton.visibility = View.VISIBLE
                             cancelVisible()
@@ -454,24 +441,23 @@ class EditingActivity : AppCompatActivity() {
                 R.id.effect2 -> {
                     buttonsInvisible()
                     progressBarVisible()
+                    cancelVisible()
+                    val image = (imageView.drawable as BitmapDrawable).bitmap
+                    val width = image.width
+                    val height = image.height
+
+                    val pixelsArray = IntArray(width * height)
+                    image.getPixels(pixelsArray, 0, width, 0, 0, width, height)
+                    val newPixelsArray = IntArray(width * height)
 
                     doAsync {
-                        val width1 = editedCompressed.width
-                        val height1 = editedCompressed.height
-                        val pixelsArrayCompressed: IntArray = bitmapToArray(editedCompressed, width1, height1)
-                        val newPixelsCompressed = IntArray(width1 * height1)
-
-                        val width2 = editedOriginal.width
-                        val height2 = editedOriginal.height
-                        val pixelsArrayOriginal: IntArray = bitmapToArray(editedOriginal, width2, height2)
-                        val newPixelsOriginal = IntArray(width2 * height2)
-
-                        for (y in 0 until height1) {
-                            for (x in 0 until width1) {
-                                var pixelAlpha = Color.alpha(pixelsArrayCompressed[y*width1+x])
-                                val pixelRed = Color.red(pixelsArrayCompressed[y*width1+x])
-                                var pixelGreen = Color.green(pixelsArrayCompressed[y*width1+x])
-                                var pixelBlue = Color.blue(pixelsArrayCompressed[y*width1+x])
+                        cancelInvisible()
+                        for (y in 0 until height) {
+                            for (x in 0 until width) {
+                                var pixelAlpha = Color.alpha(pixelsArray[y*width+x])
+                                val pixelRed = Color.red(pixelsArray[y*width+x])
+                                var pixelGreen = Color.green(pixelsArray[y*width+x])
+                                var pixelBlue = Color.blue(pixelsArray[y*width+x])
 
                                 if (pixelAlpha >= 10) {
                                     pixelAlpha -= 10
@@ -483,33 +469,12 @@ class EditingActivity : AppCompatActivity() {
                                     pixelBlue += 10
                                 }
 
-                                newPixelsCompressed[y*width1+x] = Color.argb( pixelAlpha, pixelRed, pixelGreen, pixelBlue)
+                                newPixelsArray[y*width+x] = Color.argb( pixelAlpha, pixelRed, pixelGreen, pixelBlue)
                             }
                         }
-                        for (y in 0 until height2) {
-                            for (x in 0 until width2) {
-                                var pixelAlpha = Color.alpha(pixelsArrayOriginal[y*width2+x])
-                                val pixelRed = Color.red(pixelsArrayOriginal[y*width2+x])
-                                var pixelGreen = Color.green(pixelsArrayOriginal[y*width2+x])
-                                var pixelBlue = Color.blue(pixelsArrayOriginal[y*width2+x])
-
-                                if (pixelAlpha >= 10) {
-                                    pixelAlpha -= 10
-                                }
-                                if (pixelGreen >= 10) {
-                                    pixelGreen -= 10
-                                }
-                                if (pixelBlue <= 10) {
-                                    pixelBlue += 10
-                                }
-
-                                newPixelsOriginal[y*width2+x] = Color.argb( pixelAlpha, pixelRed, pixelGreen, pixelBlue)
-                            }
-                        }
-                        editedOriginal = Bitmap.createBitmap(newPixelsOriginal, width2, height2, editedCompressed.config)
                         uiThread {
-                            editedCompressed = Bitmap.createBitmap(newPixelsCompressed, width1, height1, editedCompressed.config)
-                            imageView.setImageBitmap(editedCompressed)
+                            editedImage = Bitmap.createBitmap(newPixelsArray, width, height, image.config)
+                            imageView.setImageBitmap(editedImage)
                             progressBarInvisible()
                             effectsButton.visibility = View.VISIBLE
                             cancelVisible()
@@ -526,46 +491,32 @@ class EditingActivity : AppCompatActivity() {
                 R.id.effect3 -> {
                     buttonsInvisible()
                     progressBarVisible()
+                    cancelVisible()
+                    val image = (imageView.drawable as BitmapDrawable).bitmap
+                    val width = image.width
+                    val height = image.height
+
+                    val pixelsArray = IntArray(width * height)
+                    image.getPixels(pixelsArray, 0, width, 0, 0, width, height)
+                    val newPixelsArray = IntArray(width * height)
 
                     doAsync {
-                        val width1 = editedCompressed.width
-                        val height1 = editedCompressed.height
-                        val pixelsArrayCompressed: IntArray = bitmapToArray(editedCompressed, width1, height1)
-                        val newPixelsCompressed = IntArray(width1 * height1)
-
-                        val width2 = editedOriginal.width
-                        val height2 = editedOriginal.height
-                        val pixelsArrayOriginal: IntArray = bitmapToArray(editedOriginal, width2, height2)
-                        val newPixelsOriginal = IntArray(width2 * height2)
-
-                        for (y in 0 until height1) {
-                            for (x in 0 until width1) {
-                                val pixelAlpha = Color.alpha(pixelsArrayCompressed[y*width1+x])
-                                val pixelRed = Color.red(pixelsArrayCompressed[y*width1+x])
-                                val pixelGreen = Color.green(pixelsArrayCompressed[y*width1+x])
-                                val pixelBlue = Color.blue(pixelsArrayCompressed[y*width1+x])
+                        cancelInvisible()
+                        for (y in 0 until height) {
+                            for (x in 0 until width) {
+                                val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
+                                val pixelRed = Color.red(pixelsArray[y*width+x])
+                                val pixelGreen = Color.green(pixelsArray[y*width+x])
+                                val pixelBlue = Color.blue(pixelsArray[y*width+x])
 
                                 val grey = (pixelRed + pixelGreen + pixelBlue) / 3
 
-                                newPixelsCompressed[y*width1+x] = Color.argb(pixelAlpha, grey, grey, grey)
+                                newPixelsArray[y*width+x] = Color.argb(pixelAlpha, grey, grey, grey)
                             }
                         }
-                        for (y in 0 until height2) {
-                            for (x in 0 until width2) {
-                                val pixelAlpha = Color.alpha(pixelsArrayOriginal[y*width2+x])
-                                val pixelRed = Color.red(pixelsArrayOriginal[y*width2+x])
-                                val pixelGreen = Color.green(pixelsArrayOriginal[y*width2+x])
-                                val pixelBlue = Color.blue(pixelsArrayOriginal[y*width2+x])
-
-                                val grey = (pixelRed + pixelGreen + pixelBlue) / 3
-
-                                newPixelsOriginal[y*width2+x] = Color.argb(pixelAlpha, grey, grey, grey)
-                            }
-                        }
-                        editedOriginal = Bitmap.createBitmap(newPixelsOriginal, width2, height2, editedCompressed.config)
                         uiThread {
-                            editedCompressed = Bitmap.createBitmap(newPixelsCompressed, width1, height1, editedCompressed.config)
-                            imageView.setImageBitmap(editedCompressed)
+                            editedImage = Bitmap.createBitmap(newPixelsArray, width, height, image.config)
+                            imageView.setImageBitmap(editedImage)
                             progressBarInvisible()
                             effectsButton.visibility = View.VISIBLE
                             cancelVisible()
@@ -582,24 +533,23 @@ class EditingActivity : AppCompatActivity() {
                 R.id.effect4 -> {
                     buttonsInvisible()
                     progressBarVisible()
+                    cancelVisible()
+                    val image = (imageView.drawable as BitmapDrawable).bitmap
+                    val width = image.width
+                    val height = image.height
+
+                    val pixelsArray = IntArray(width * height)
+                    image.getPixels(pixelsArray, 0, width, 0, 0, width, height)
+                    val newPixelsArray = IntArray(width * height)
 
                     doAsync {
-                        val width1 = editedCompressed.width
-                        val height1 = editedCompressed.height
-                        val pixelsArrayCompressed: IntArray = bitmapToArray(editedCompressed, width1, height1)
-                        val newPixelsCompressed = IntArray(width1 * height1)
-
-                        val width2 = editedOriginal.width
-                        val height2 = editedOriginal.height
-                        val pixelsArrayOriginal: IntArray = bitmapToArray(editedOriginal, width2, height2)
-                        val newPixelsOriginal = IntArray(width2 * height2)
-
-                        for (y in 0 until height1) {
-                            for (x in 0 until width1) {
-                                val pixelAlpha = Color.alpha(pixelsArrayCompressed[y*width1+x])
-                                val pixelRed = Color.red(pixelsArrayCompressed[y*width1+x])
-                                val pixelGreen = Color.green(pixelsArrayCompressed[y*width1+x])
-                                val pixelBlue = Color.blue(pixelsArrayCompressed[y*width1+x])
+                        cancelInvisible()
+                        for (y in 0 until height) {
+                            for (x in 0 until width) {
+                                val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
+                                val pixelRed = Color.red(pixelsArray[y*width+x])
+                                val pixelGreen = Color.green(pixelsArray[y*width+x])
+                                val pixelBlue = Color.blue(pixelsArray[y*width+x])
 
                                 var mid = (pixelRed + pixelGreen + pixelBlue) / 3
                                 when (mid) {
@@ -614,36 +564,12 @@ class EditingActivity : AppCompatActivity() {
                                     }
                                 }
 
-                                newPixelsCompressed[y*width1+x] = Color.argb(pixelAlpha, mid, mid, mid)
+                                newPixelsArray[y*width+x] = Color.argb(pixelAlpha, mid, mid, mid)
                             }
                         }
-                        for (y in 0 until height2) {
-                            for (x in 0 until width2) {
-                                val pixelAlpha = Color.alpha(pixelsArrayOriginal[y*width2+x])
-                                val pixelRed = Color.red(pixelsArrayOriginal[y*width2+x])
-                                val pixelGreen = Color.green(pixelsArrayOriginal[y*width2+x])
-                                val pixelBlue = Color.blue(pixelsArrayOriginal[y*width2+x])
-
-                                var mid = (pixelRed + pixelGreen + pixelBlue) / 3
-                                when (mid) {
-                                    in 0..115 -> {
-                                        mid = 0
-                                    }
-                                    in 116..149 -> {
-                                        mid = 134
-                                    }
-                                    in 155..255 -> {
-                                        mid = 255
-                                    }
-                                }
-
-                                newPixelsOriginal[y*width2+x] = Color.argb(pixelAlpha, mid, mid, mid)
-                            }
-                        }
-                        editedOriginal = Bitmap.createBitmap(newPixelsOriginal, width2, height2, editedCompressed.config)
                         uiThread {
-                            editedCompressed = Bitmap.createBitmap(newPixelsCompressed, width1, height1, editedCompressed.config)
-                            imageView.setImageBitmap(editedCompressed)
+                            editedImage = Bitmap.createBitmap(newPixelsArray, width, height, image.config)
+                            imageView.setImageBitmap(editedImage)
                             progressBarInvisible()
                             effectsButton.visibility = View.VISIBLE
                             cancelVisible()
@@ -660,44 +586,31 @@ class EditingActivity : AppCompatActivity() {
                 R.id.effect5 -> {
                     buttonsInvisible()
                     progressBarVisible()
+                    cancelVisible()
+                    val image = (imageView.drawable as BitmapDrawable).bitmap
+                    val width = image.width
+                    val height = image.height
+
+                    val pixelsArray = IntArray(width * height)
+                    image.getPixels(pixelsArray, 0, width, 0, 0, width, height)
+                    val newPixelsArray = IntArray(width * height)
 
                     doAsync {
-                        val width1 = editedCompressed.width
-                        val height1 = editedCompressed.height
-                        val pixelsArrayCompressed: IntArray = bitmapToArray(editedCompressed, width1, height1)
-                        val newPixelsCompressed = IntArray(width1 * height1)
+                        cancelInvisible()
+                        for (y in 0 until height) {
+                            for (x in 0 until width) {
+                                val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
+                                val pixelRed = Color.red(pixelsArray[y*width+x])
+                                val pixelGreen = Color.green(pixelsArray[y*width+x])
+                                val pixelBlue = Color.blue(pixelsArray[y*width+x])
 
-                        val width2 = editedOriginal.width
-                        val height2 = editedOriginal.height
-                        val pixelsArrayOriginal: IntArray = bitmapToArray(editedOriginal, width2, height2)
-                        val newPixelsOriginal = IntArray(width2 * height2)
-
-                        for (y in 0 until height1) {
-                            for (x in 0 until width1) {
-                                val pixelAlpha = Color.alpha(pixelsArrayCompressed[y*width1+x])
-                                val pixelRed = Color.red(pixelsArrayCompressed[y*width1+x])
-                                val pixelGreen = Color.green(pixelsArrayCompressed[y*width1+x])
-                                val pixelBlue = Color.blue(pixelsArrayCompressed[y*width1+x])
-
-                                newPixelsCompressed[y*width1+x] = Color.argb(pixelAlpha, 255-pixelRed,
+                                newPixelsArray[y*width+x] = Color.argb(pixelAlpha, 255-pixelRed,
                                     255-pixelGreen, 255-pixelBlue)
                             }
                         }
-                        for (y in 0 until height2) {
-                            for (x in 0 until width2) {
-                                val pixelAlpha = Color.alpha(pixelsArrayOriginal[y*width2+x])
-                                val pixelRed = Color.red(pixelsArrayOriginal[y*width2+x])
-                                val pixelGreen = Color.green(pixelsArrayOriginal[y*width2+x])
-                                val pixelBlue = Color.blue(pixelsArrayOriginal[y*width2+x])
-
-                                newPixelsOriginal[y*width2+x] = Color.argb(pixelAlpha, 255-pixelRed,
-                                    255-pixelGreen, 255-pixelBlue)
-                            }
-                        }
-                        editedOriginal = Bitmap.createBitmap(newPixelsOriginal, width2, height2, editedCompressed.config)
                         uiThread {
-                            editedCompressed = Bitmap.createBitmap(newPixelsCompressed, width1, height1, editedCompressed.config)
-                            imageView.setImageBitmap(editedCompressed)
+                            editedImage = Bitmap.createBitmap(newPixelsArray, width, height, image.config)
+                            imageView.setImageBitmap(editedImage)
                             progressBarInvisible()
                             effectsButton.visibility = View.VISIBLE
                             cancelVisible()
@@ -714,24 +627,23 @@ class EditingActivity : AppCompatActivity() {
                 R.id.effect6 -> {
                     buttonsInvisible()
                     progressBarVisible()
+                    cancelVisible()
+                    val image = (imageView.drawable as BitmapDrawable).bitmap
+                    val width = image.width
+                    val height = image.height
+
+                    val pixelsArray = IntArray(width * height)
+                    image.getPixels(pixelsArray, 0, width, 0, 0, width, height)
+                    val newPixelsArray = IntArray(width * height)
 
                     doAsync {
-                        val width1 = editedCompressed.width
-                        val height1 = editedCompressed.height
-                        val pixelsArrayCompressed: IntArray = bitmapToArray(editedCompressed, width1, height1)
-                        val newPixelsCompressed = IntArray(width1 * height1)
-
-                        val width2 = editedOriginal.width
-                        val height2 = editedOriginal.height
-                        val pixelsArrayOriginal: IntArray = bitmapToArray(editedOriginal, width2, height2)
-                        val newPixelsOriginal = IntArray(width2 * height2)
-
-                        for (y in 0 until height1) {
-                            for (x in 0 until width1) {
-                                val pixelAlpha = Color.alpha(pixelsArrayCompressed[y*width1+x])
-                                var pixelRed = Color.red(pixelsArrayCompressed[y*width1+x])
-                                var pixelGreen = Color.green(pixelsArrayCompressed[y*width1+x])
-                                var pixelBlue = Color.blue(pixelsArrayCompressed[y*width1+x])
+                        cancelInvisible()
+                        for (y in 0 until height) {
+                            for (x in 0 until width) {
+                                val pixelAlpha = Color.alpha(pixelsArray[y*width+x])
+                                var pixelRed = Color.red(pixelsArray[y*width+x])
+                                var pixelGreen = Color.green(pixelsArray[y*width+x])
+                                var pixelBlue = Color.blue(pixelsArray[y*width+x])
 
                                 pixelRed =(pixelRed * 0.393 + pixelGreen * 0.769 + pixelBlue * 0.189).toInt()
                                 pixelGreen =(pixelRed * 0.349 + pixelGreen * 0.686 + pixelBlue * 0.168).toInt()
@@ -741,28 +653,13 @@ class EditingActivity : AppCompatActivity() {
                                 if (pixelGreen > 255) pixelGreen = 255
                                 if (pixelBlue > 255) pixelBlue = 255
 
-                                newPixelsCompressed[y*width1+x] = Color.argb(pixelAlpha, pixelRed, pixelGreen, pixelBlue)
+                                newPixelsArray[y*width+x] = Color.argb(
+                                        pixelAlpha, pixelRed, pixelGreen, pixelBlue)
                             }
                         }
-                        for (y in 0 until height2) {
-                            for (x in 0 until width2) {
-                                val pixelAlpha = Color.alpha(pixelsArrayOriginal[y*width2+x])
-                                var pixelRed = Color.red(pixelsArrayOriginal[y*width2+x])
-                                var pixelGreen = Color.green(pixelsArrayOriginal[y*width2+x])
-                                var pixelBlue = Color.blue(pixelsArrayOriginal[y*width2+x])
-
-                                if (pixelRed > 255) pixelRed = 255
-                                if (pixelGreen > 255) pixelGreen = 255
-                                if (pixelBlue > 255) pixelBlue = 255
-
-                                newPixelsOriginal[y*width2+x] = Color.argb(pixelAlpha, pixelRed, pixelGreen, pixelBlue)
-                            }
-                        }
-                        editedOriginal = Bitmap.createBitmap(newPixelsOriginal, width2, height2, editedCompressed.config)
                         uiThread {
-                            editedCompressed = Bitmap.createBitmap(newPixelsCompressed, width1, height1, editedCompressed.config)
-                            imageView.setImageBitmap(editedCompressed)
-
+                            editedImage = Bitmap.createBitmap(newPixelsArray, width, height, image.config)
+                            imageView.setImageBitmap(editedImage)
                             progressBarInvisible()
                             effectsButton.visibility = View.VISIBLE
                             cancelVisible()
@@ -779,14 +676,11 @@ class EditingActivity : AppCompatActivity() {
             }
         }
         menu.show()
-
-        return editedOriginal
     }
 
     //----------масштабирование
-    private fun scaling(compressed: Bitmap, original: Bitmap): Bitmap {
-        var scaledOriginal: Bitmap = original
-        var scaledCompressed: Bitmap = compressed
+    private fun scaling(originalImage: Bitmap) {
+        var scaledImage: Bitmap = originalImage
 
         buttonsInvisible()
         seekBarVisible()
@@ -797,8 +691,7 @@ class EditingActivity : AppCompatActivity() {
         degrees.text = "100%"
 
         cancelButton.setOnClickListener {
-            imageView.setImageBitmap(compressed)
-            scaledOriginal = original
+            imageView.setImageBitmap(originalImage)
             seekBarInvisible()
             progressBarInvisible()
             buttonsVisible()
@@ -806,7 +699,7 @@ class EditingActivity : AppCompatActivity() {
             allowInvisible()
         }
         allowButton.setOnClickListener {
-            imageView.setImageBitmap(scaledCompressed)
+            imageView.setImageBitmap(scaledImage)
             seekBarInvisible()
             progressBarInvisible()
             buttonsVisible()
@@ -828,11 +721,10 @@ class EditingActivity : AppCompatActivity() {
 
                 doAsync {
                     cancelInvisible()
-                    scaledCompressed = bilinearInterpolation(scaledCompressed, (seek.progress).toDouble() / 100)
-                    scaledOriginal = bilinearInterpolation(scaledOriginal, (seek.progress).toDouble() / 100)
+                    scaledImage = bilinearInterpolation((seek.progress).toDouble() / 100)
 
                     uiThread {
-                        imageView.setImageBitmap(scaledCompressed)
+                        imageView.setImageBitmap(scaledImage)
                         progressBarInvisible()
                         allowVisible()
                         cancelVisible()
@@ -854,11 +746,11 @@ class EditingActivity : AppCompatActivity() {
                 }
             }
         })
-        return scaledOriginal
     }
 
     //----------алгоритм масштабирования (билинейная интерполяция)
-    private fun bilinearInterpolation(image: Bitmap, ratio: Double): Bitmap {
+    private fun bilinearInterpolation(ratio: Double): Bitmap {
+        val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
         // высота и ширина оригинала
         val width1 = image.width
         val height1 = image.height
@@ -866,19 +758,19 @@ class EditingActivity : AppCompatActivity() {
         val pixelsArray = IntArray(width1 * height1)
         image.getPixels(pixelsArray, 0, width1, 0, 0, width1, height1)
 
-        // новые ширина и высота с учетом коэффициента
+        // новые ширина и высота с учет
         val width2 = (image.width * ratio).toInt()
         val height2 = (image.height * ratio).toInt()
         val newPixelsArray = IntArray(width2 * height2)
 
-        var x: Int
-        var y: Int
-        var index: Int
-        // квадрат пикселей 2х2
+        // рассмотрим квадрат пикселей 2х2
         var a: Int   // верхний левый пиксель
         var b: Int   // верхий правый
         var c: Int   // нижний левый
         var d: Int   // нижний правый
+        var x: Int
+        var y: Int
+        var index: Int
 
         val xRatio = (width1 - 1).toFloat() / width2
         val yRatio = (height1 - 1).toFloat() / height2
@@ -996,6 +888,148 @@ class EditingActivity : AppCompatActivity() {
                 Color.argb(pixelAlpha, pixelRed, pixelGreen, pixelBlue))
         }
         return image
+    }
+
+    private fun unsharpMasking(amount: Float, threshold: Int, radius: Int, image: Bitmap):Bitmap {
+        var red = 0
+        var green = 0
+        var blue = 0
+        var blurredRed = 0
+        var blurredGreen = 0
+        var blurredBlue = 0
+        var unsMaskPixel = 0
+        val alpha = -0x1000000
+        val pixels = IntArray(image.width*image.height)
+        image.getPixels(pixels, 0, image.width, 0, 0, image.width, image.height)
+        val imageBlurred = blurring(image, radius)
+        val temp = IntArray(imageBlurred!!.width*imageBlurred.height)
+        imageBlurred.getPixels(temp, 0, imageBlurred.width, 0, 0, imageBlurred.width, imageBlurred.height)
+
+        for (i in 0 until image.height) {
+            for (j in 0 until image.width) {
+
+                val originalPixel = pixels[i*image.width+j]
+                val blurredPixel = temp[i*imageBlurred.width+j]
+                red = originalPixel shr 16 and 0xff
+                green = originalPixel shr 8 and 0xff
+                blue = originalPixel and 0xff
+                blurredRed = blurredPixel shr 16 and 0xff
+                blurredGreen = blurredPixel shr 8 and 0xff
+                blurredBlue = blurredPixel and 0xff
+
+                if (abs(red - blurredRed) >= threshold) {
+                    red = (amount * (red - blurredRed) + red).toInt()
+                    red = if (red > 255) 255 else if (red < 0) 0 else red
+                }
+                if (abs(green - blurredGreen) >= threshold) {
+                    green = (amount * (green - blurredGreen) + green).toInt()
+                    green = if (green > 255) 255 else if (green < 0) 0 else green
+                }
+                if (abs(blue - blurredBlue) >= threshold) {
+                    blue  = (amount * (blue - blurredBlue) + blue ).toInt()
+                    blue  = if (blue  > 255) 255 else if (blue  < 0) 0 else blue
+                }
+                unsMaskPixel = alpha or (red shl 16) or (green shl 8) or blue
+                temp[i*image.width+j] = unsMaskPixel
+            }
+            }
+        return Bitmap.createBitmap(temp, image.width, image.height, Bitmap.Config.ARGB_8888)
+
+    }
+    private fun blurring(image: Bitmap, radius: Int): Bitmap? {
+        assert(radius and 1 == 0) { "Range must be odd." }
+        val blurredImage = Bitmap.createBitmap(image.width, image.height, Bitmap.Config.ARGB_8888)
+        val c = Canvas(blurredImage)
+        val width = image.width
+        val height = image.height
+        val pixels = IntArray(image.width * image.height)
+        image.getPixels(pixels, 0, width, 0, 0, width, height)
+        blurringHorizontal(pixels, width, height, radius / 2)
+        boxBlurVertical(pixels, width, height, radius / 2)
+        c.drawBitmap(pixels, 0, width, 0.0f, 0.0f, width, height, true, null)
+        return blurredImage
+    }
+
+    private fun blurringHorizontal(pixels: IntArray, width: Int, height: Int, halfRange: Int) {
+        var index = 0
+        val newColors = IntArray(width)
+        for (y in 0 until height) {
+            var hits = 0
+            var red: Long = 0
+            var green: Long = 0
+            var blue: Long = 0
+            for (x in -halfRange until width) {
+                val oldPixel = x - halfRange - 1
+                if (oldPixel >= 0) {
+                    val color = pixels[index + oldPixel]
+                    if (color != 0) {
+                        red -= Color.red(color).toLong()
+                        green -= Color.green(color).toLong()
+                        blue -= Color.blue(color).toLong()
+                    }
+                    hits--
+                }
+                val newPixel = x + halfRange
+                if (newPixel < width) {
+                    val color = pixels[index + newPixel]
+                    if (color != 0) {
+                        red += Color.red(color).toLong()
+                        green += Color.green(color).toLong()
+                        blue += Color.blue(color).toLong()
+                    }
+                    hits++
+                }
+                if (x >= 0) {
+                    newColors[x] = Color.argb(0xFF, (red / hits).toInt(), (green / hits).toInt(), (blue / hits).toInt())
+                }
+            }
+            for (x in 0 until width) {
+                pixels[index + x] = newColors[x]
+            }
+            index += width
+        }
+    }
+
+    private fun boxBlurVertical(pixels: IntArray, width: Int, height: Int, halfRange: Int) {
+        val newColors = IntArray(height)
+        val oldPixelOffset = -(halfRange + 1) * width
+        val newPixelOffset = halfRange * width
+        for (x in 0 until width) {
+            var hits = 0
+            var red: Long = 0
+            var green: Long = 0
+            var blue: Long = 0
+            var index = -halfRange * width + x
+            for (y in -halfRange until height) {
+                val oldPixel = y - halfRange - 1
+                if (oldPixel >= 0) {
+                    val color = pixels[index + oldPixelOffset]
+                    if (color != 0) {
+                        red -= Color.red(color).toLong()
+                        green -= Color.green(color).toLong()
+                        blue -= Color.blue(color).toLong()
+                    }
+                    hits--
+                }
+                val newPixel = y + halfRange
+                if (newPixel < height) {
+                    val color = pixels[index + newPixelOffset]
+                    if (color != 0) {
+                        red += Color.red(color).toLong()
+                        green += Color.green(color).toLong()
+                        blue += Color.blue(color).toLong()
+                    }
+                    hits++
+                }
+                if (y >= 0) {
+                    newColors[y] = Color.argb(0xFF, (red / hits).toInt(), (green / hits).toInt(), (blue / hits).toInt())
+                }
+                index += width
+            }
+            for (y in 0 until height) {
+                pixels[y * width + x] = newColors[y]
+            }
+        }
     }
 }
 
