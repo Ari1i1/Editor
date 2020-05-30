@@ -7,6 +7,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.provider.MediaStore
 import android.text.format.Time
 import android.view.KeyEvent.ACTION_DOWN
 import android.view.KeyEvent.ACTION_UP
@@ -14,6 +15,7 @@ import android.view.MotionEvent.ACTION_MOVE
 import android.view.View
 import android.widget.PopupMenu
 import android.widget.SeekBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_editing.*
@@ -35,10 +37,18 @@ class EditingActivity : AppCompatActivity() {
 
         val uriString: String? = intent.getStringExtra("imageUri")
         val uri = Uri.parse(uriString)
-        imageView.setImageURI(uri)
-        val startImage: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
 
-        seekBarInvisible()
+        var startImage = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
+        if (startImage.width or startImage.height > 2048) {
+            startImage = bilinearInterpolation(startImage, 0.5)
+        }
+
+        imageView.setImageBitmap(startImage)
+
+        seekBarInvisible(seekBar1, text1)
+        seekBarInvisible(seekBar1, text4)
+        seekBarInvisible(seekBar1, text2)
+        seekBarInvisible(seekBar1, text3)
         progressBarInvisible()
         allowInvisible()
         cancelInvisible()
@@ -109,36 +119,26 @@ class EditingActivity : AppCompatActivity() {
                 .show()
         }
 
-        //--------билин., трилин. фильтрация
+        //--------нерезкое маскирование
         unsharpMaskingButton.setOnClickListener {
             val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
-            val amount: Float = 100.3567F
-            val threshold = 100
-            val radius = 100
-            val temp = unsharpMasking(amount, threshold, radius, image)
-//            val temp = blurring(image, radius)
-            imageView.setImageBitmap(temp)
-            Toast.makeText(this@EditingActivity, "Выполнено маскирование", Toast.LENGTH_SHORT)
-                .show()
+            unsharpMasking(image)
         }
         unsharpMaskingText.setOnClickListener {
             val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
-            val amount: Float = 100.3567F
-            val threshold = 100
-            val radius = 100
-//            val temp = blurring(image, radius)
-            val temp = unsharpMasking(amount, threshold, radius, image)
-            imageView.setImageBitmap(temp)
-            Toast.makeText(this@EditingActivity, "Выполнено маскирование", Toast.LENGTH_SHORT)
-                .show()
-
+            unsharpMasking(image)
         }
     }
 
     //----------изменение активности SeekBar, ProgressBar и нижних кнопок
-    private fun seekBarVisible() {
-        seekBar.visibility = View.VISIBLE
-        degrees.visibility = View.VISIBLE
+    private fun seekBarVisible(seek: SeekBar, text: TextView) {
+        text.visibility = View.VISIBLE
+        seek.visibility = View.VISIBLE
+    }
+
+    private fun seekBarInvisible(seek: SeekBar, text: TextView) {
+        text.visibility = View.GONE
+        seek.visibility = View.GONE
     }
 
     private fun buttonsInvisible() {
@@ -159,11 +159,6 @@ class EditingActivity : AppCompatActivity() {
         unsharpMaskingText.visibility = View.GONE
         saveText.visibility = View.GONE
         undoText.visibility = View.GONE
-    }
-
-    private fun seekBarInvisible() {
-        degrees.visibility = View.GONE
-        seekBar.visibility = View.GONE
     }
 
     private fun buttonsVisible() {
@@ -217,14 +212,15 @@ class EditingActivity : AppCompatActivity() {
 
         cancelVisible()
         buttonsInvisible()
-        seekBarVisible()
-        seekBar.max = 0
-        seekBar.max = 360
-        seekBar.progress = 180
+        seekBarVisible(seekBar1, text1)
+        seekBar1.max = 0
+        seekBar1.max = 360
+        seekBar1.progress = 180
+        text1.text = "0°"
 
         cancelButton.setOnClickListener {
             imageView.setImageBitmap(originalImage)
-            seekBarInvisible()
+            seekBarInvisible(seekBar1, text1)
             progressBarInvisible()
             buttonsVisible()
             cancelInvisible()
@@ -232,16 +228,16 @@ class EditingActivity : AppCompatActivity() {
         }
         allowButton.setOnClickListener {
             imageView.setImageBitmap(rotatedImage)
-            seekBarInvisible()
+            seekBarInvisible(seekBar1, text1)
             progressBarInvisible()
             buttonsVisible()
             cancelInvisible()
             allowInvisible()
         }
 
-        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        seekBar1.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seek: SeekBar, progess: Int, fromUser: Boolean) {
-                degrees.text = (seek.progress - 180).toString() + "°"
+                text1.text = (seek.progress - 180).toString() + "°"
             }
 
             override fun onStartTrackingTouch(seek: SeekBar) {
@@ -249,21 +245,21 @@ class EditingActivity : AppCompatActivity() {
 
             override fun onStopTrackingTouch(seek: SeekBar) {
                 progressBarVisible()
-                seekBarInvisible()
+                seekBarInvisible(seekBar1, text1)
 
                 doAsync {
                     cancelInvisible()
-                    rotatedImage = rotation(seekBar.progress - 180)
+                    rotatedImage = rotation(seekBar1.progress - 180)
 
                     uiThread {
                         imageView.setImageBitmap(rotatedImage)
                         progressBarInvisible()
                         allowVisible()
                         cancelVisible()
-                        seekBarVisible()
+                        seekBarVisible(seekBar1, text1)
                         Toast.makeText(
                             this@EditingActivity,
-                            "Выполнен поворот на " + (seekBar.progress - 180) + "°",
+                            "Выполнен поворот на " + (seekBar1.progress - 180) + "°",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -713,16 +709,16 @@ class EditingActivity : AppCompatActivity() {
         var scaledImage: Bitmap = originalImage
 
         buttonsInvisible()
-        seekBarVisible()
+        seekBarVisible(seekBar1, text1)
         cancelVisible()
-        seekBar.max = 0
-        seekBar.max = 200
-        seekBar.progress = 100
-        degrees.text = "100%"
+        seekBar1.max = 0
+        seekBar1.max = 200
+        seekBar1.progress = 100
+        text1.text = "100%"
 
         cancelButton.setOnClickListener {
             imageView.setImageBitmap(originalImage)
-            seekBarInvisible()
+            seekBarInvisible(seekBar1, text1)
             progressBarInvisible()
             buttonsVisible()
             cancelInvisible()
@@ -730,16 +726,16 @@ class EditingActivity : AppCompatActivity() {
         }
         allowButton.setOnClickListener {
             imageView.setImageBitmap(scaledImage)
-            seekBarInvisible()
+            seekBarInvisible(seekBar1, text1)
             progressBarInvisible()
             buttonsVisible()
             cancelInvisible()
             allowInvisible()
         }
 
-        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+        seekBar1.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seek: SeekBar, progess: Int, fromUser: Boolean) {
-                degrees.text = (seek.progress).toString() + "%"
+                text1.text = (seek.progress).toString() + "%"
             }
 
             override fun onStartTrackingTouch(seek: SeekBar) {
@@ -747,28 +743,29 @@ class EditingActivity : AppCompatActivity() {
 
             override fun onStopTrackingTouch(seek: SeekBar) {
                 progressBarVisible()
-                seekBarInvisible()
+                seekBarInvisible(seekBar1, text1)
 
                 doAsync {
                     cancelInvisible()
-                    scaledImage = bilinearInterpolation((seek.progress).toDouble() / 100)
+                    scaledImage = bilinearInterpolation(
+                        (imageView.drawable as BitmapDrawable).bitmap, seek.progress.toDouble() / 100)
 
                     uiThread {
                         imageView.setImageBitmap(scaledImage)
                         progressBarInvisible()
                         allowVisible()
                         cancelVisible()
-                        seekBarVisible()
-                        if (seekBar.progress > 100) {
+                        seekBarVisible(seekBar1, text1)
+                        if (seekBar1.progress > 100) {
                             Toast.makeText(
                                 this@EditingActivity,
-                                "Изображение увеличено на " + (seekBar.progress - 100) + "%",
+                                "Изображение увеличено на " + (seekBar1.progress - 100) + "%",
                                 Toast.LENGTH_SHORT
                             ).show()
                         } else {
                             Toast.makeText(
                                 this@EditingActivity,
-                                "Изображение уменьшено на " + (100 - seekBar.progress) + "%",
+                                "Изображение уменьшено на " + (100 - seekBar1.progress) + "%",
                                 Toast.LENGTH_SHORT
                             ).show()
                         }
@@ -779,8 +776,7 @@ class EditingActivity : AppCompatActivity() {
     }
 
     //----------алгоритм масштабирования (билинейная интерполяция)
-    private fun bilinearInterpolation(ratio: Double): Bitmap {
-        val image: Bitmap = (imageView.drawable as BitmapDrawable).bitmap
+    private fun bilinearInterpolation(image: Bitmap, ratio: Double): Bitmap {
         // высота и ширина оригинала
         val width1 = image.width
         val height1 = image.height
@@ -927,13 +923,31 @@ class EditingActivity : AppCompatActivity() {
         return image
     }
 
+    //----------нерезкое маскирование
+    private fun unsharpMasking(originalImage: Bitmap){
+        var editableImage: Bitmap = originalImage
+        var amount = 0
+        var threshold = 0
+        var radius = 0
+
+        cancelVisible()
+        buttonsInvisible()
+
+        seekBarVisible(seekBar1, text3)
+        seekBarVisible(seekBar1, text4)
+        seekBarVisible(seekBar1, text2)
+
+        seekBar1.max = 0
+        seekBar1.max = 100
+        seekBar1.progress = 0
+        text4.text = "Эффект: 0"
+        text2.text = "Порог: 0"
+        text3.text = "Радиус: 0"
+    }
+
     //---------нерезкое маскирование
-    private fun unsharpMasking(
-        amount: Float,
-        threshold: Int,
-        radius: Int,
-        image: Bitmap
-    ): Bitmap {
+    private fun unsharpAlg(
+        amount: Int, threshold: Int, radius: Int, image: Bitmap): Bitmap {
         var red = 0
         var green = 0
         var blue = 0
