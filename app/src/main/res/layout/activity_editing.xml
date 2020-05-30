@@ -35,7 +35,7 @@
         android:id="@+id/effectsButton"
         android:layout_width="66dp"
         android:layout_height="61dp"
-        android:backgroundTint="#00FFFFFF"
+        android:backgroundTint="@color/colorNull"
         android:tint="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -49,7 +49,7 @@
         android:id="@+id/rotateButton"
         android:layout_width="64dp"
         android:layout_height="61dp"
-        android:backgroundTint="#00FFFFFF"
+        android:backgroundTint="@color/colorNull"
         android:tint="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -63,7 +63,7 @@
         android:id="@+id/scalingButton"
         android:layout_width="64dp"
         android:layout_height="60dp"
-        android:backgroundTint="#00FFFFFF"
+        android:backgroundTint="@color/colorNull"
         android:tint="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -77,7 +77,7 @@
         android:id="@+id/retouchButton"
         android:layout_width="61dp"
         android:layout_height="61dp"
-        android:backgroundTint="#00FFFFFF"
+        android:backgroundTint="@color/colorNull"
         android:tint="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -91,7 +91,7 @@
         android:id="@+id/segmentationButton"
         android:layout_width="61dp"
         android:layout_height="61dp"
-        android:backgroundTint="#00FFFFFF"
+        android:backgroundTint="@color/colorNull"
         android:tint="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -105,7 +105,7 @@
         android:id="@+id/unsharpMaskingButton"
         android:layout_width="61dp"
         android:layout_height="61dp"
-        android:backgroundTint="#00FFFFFF"
+        android:backgroundTint="@color/colorNull"
         android:tint="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -119,7 +119,7 @@
         android:id="@+id/saveButton"
         android:layout_width="72dp"
         android:layout_height="55dp"
-        android:backgroundTint="#00FFFFFF"
+        android:backgroundTint="@color/colorNull"
         android:tint="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -133,7 +133,7 @@
         android:id="@+id/undoButton"
         android:layout_width="60dp"
         android:layout_height="55dp"
-        android:backgroundTint="#00FFFFFF"
+        android:backgroundTint="@color/colorNull"
         android:tint="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -147,7 +147,7 @@
         android:id="@+id/allowButton"
         android:layout_width="60dp"
         android:layout_height="55dp"
-        android:backgroundTint="#00FFFFFF"
+        android:backgroundTint="@color/colorNull"
         android:tint="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -161,7 +161,7 @@
         android:id="@+id/cancelButton"
         android:layout_width="60dp"
         android:layout_height="55dp"
-        android:backgroundTint="#00FFFFFF"
+        android:backgroundTint="@color/colorNull"
         android:tint="@color/colorAccent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -298,73 +298,38 @@
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:progress="0"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.495"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.884" />
+        app:layout_constraintVertical_bias="0.894" />
 
     <TextView
         android:id="@+id/text1"
-        android:layout_width="60dp"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="9dp"
 
-        android:layout_marginBottom="8dp"
         android:textAlignment="center"
         android:textColor="@color/colorAccent"
         android:textSize="13sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/seekBar1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/seekBar1"
-        app:layout_constraintVertical_bias="0.319" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.954" />
 
-    <TextView
-        android:id="@+id/text4"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-
-        android:textAlignment="center"
-        android:textColor="@color/colorAccent"
-        android:textSize="13sp"
+    <View
+        android:id="@+id/viewRet"
+        android:layout_width="fill_parent"
+        android:layout_height="430dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.147"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.823" />
+        app:layout_constraintVertical_bias="0.454"  />
 
-    <TextView
-        android:id="@+id/text2"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-
-        android:textAlignment="center"
-        android:textColor="@color/colorAccent"
-        android:textSize="13sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.868"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.823" />
-
-    <TextView
-        android:id="@+id/text3"
-        android:layout_width="100dp"
-        android:layout_height="wrap_content"
-
-        android:textAlignment="center"
-        android:textColor="@color/colorAccent"
-        android:textSize="13sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.508"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.823" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

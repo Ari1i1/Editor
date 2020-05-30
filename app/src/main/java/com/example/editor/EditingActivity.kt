@@ -46,9 +46,6 @@ class EditingActivity : AppCompatActivity() {
         imageView.setImageBitmap(startImage)
 
         seekBarInvisible(seekBar1, text1)
-        seekBarInvisible(seekBar1, text4)
-        seekBarInvisible(seekBar1, text2)
-        seekBarInvisible(seekBar1, text3)
         progressBarInvisible()
         allowInvisible()
         cancelInvisible()
@@ -382,7 +379,7 @@ class EditingActivity : AppCompatActivity() {
         val menu = PopupMenu(this, effectsButton)
         menu.inflate(R.menu.effects_menu)
 
-        var editedImage: Bitmap = originalImage
+        var editableImage: Bitmap = originalImage
 
         cancelButton.setOnClickListener {
             imageView.setImageBitmap(originalImage)
@@ -392,7 +389,7 @@ class EditingActivity : AppCompatActivity() {
             allowInvisible()
         }
         allowButton.setOnClickListener {
-            imageView.setImageBitmap(editedImage)
+            imageView.setImageBitmap(editableImage)
             progressBarInvisible()
             buttonsVisible()
             cancelInvisible()
@@ -428,9 +425,9 @@ class EditingActivity : AppCompatActivity() {
                             }
                         }
                         uiThread {
-                            editedImage =
+                            editableImage =
                                 Bitmap.createBitmap(newPixelsArray, width, height, image.config)
-                            imageView.setImageBitmap(editedImage)
+                            imageView.setImageBitmap(editableImage)
                             progressBarInvisible()
                             effectsButton.visibility = View.VISIBLE
                             cancelVisible()
@@ -481,9 +478,9 @@ class EditingActivity : AppCompatActivity() {
                             }
                         }
                         uiThread {
-                            editedImage =
+                            editableImage =
                                 Bitmap.createBitmap(newPixelsArray, width, height, image.config)
-                            imageView.setImageBitmap(editedImage)
+                            imageView.setImageBitmap(editableImage)
                             progressBarInvisible()
                             effectsButton.visibility = View.VISIBLE
                             cancelVisible()
@@ -526,9 +523,9 @@ class EditingActivity : AppCompatActivity() {
                             }
                         }
                         uiThread {
-                            editedImage =
+                            editableImage =
                                 Bitmap.createBitmap(newPixelsArray, width, height, image.config)
-                            imageView.setImageBitmap(editedImage)
+                            imageView.setImageBitmap(editableImage)
                             progressBarInvisible()
                             effectsButton.visibility = View.VISIBLE
                             cancelVisible()
@@ -582,9 +579,9 @@ class EditingActivity : AppCompatActivity() {
                             }
                         }
                         uiThread {
-                            editedImage =
+                            editableImage =
                                 Bitmap.createBitmap(newPixelsArray, width, height, image.config)
-                            imageView.setImageBitmap(editedImage)
+                            imageView.setImageBitmap(editableImage)
                             progressBarInvisible()
                             effectsButton.visibility = View.VISIBLE
                             cancelVisible()
@@ -627,9 +624,9 @@ class EditingActivity : AppCompatActivity() {
                             }
                         }
                         uiThread {
-                            editedImage =
+                            editableImage =
                                 Bitmap.createBitmap(newPixelsArray, width, height, image.config)
-                            imageView.setImageBitmap(editedImage)
+                            imageView.setImageBitmap(editableImage)
                             progressBarInvisible()
                             effectsButton.visibility = View.VISIBLE
                             cancelVisible()
@@ -682,9 +679,9 @@ class EditingActivity : AppCompatActivity() {
                             }
                         }
                         uiThread {
-                            editedImage =
+                            editableImage =
                                 Bitmap.createBitmap(newPixelsArray, width, height, image.config)
-                            imageView.setImageBitmap(editedImage)
+                            imageView.setImageBitmap(editableImage)
                             progressBarInvisible()
                             effectsButton.visibility = View.VISIBLE
                             cancelVisible()
@@ -748,7 +745,9 @@ class EditingActivity : AppCompatActivity() {
                 doAsync {
                     cancelInvisible()
                     scaledImage = bilinearInterpolation(
-                        (imageView.drawable as BitmapDrawable).bitmap, seek.progress.toDouble() / 100)
+                        (imageView.drawable as BitmapDrawable).bitmap,
+                        seek.progress.toDouble() / 100
+                    )
 
                     uiThread {
                         imageView.setImageBitmap(scaledImage)
@@ -852,42 +851,44 @@ class EditingActivity : AppCompatActivity() {
         var editableImage: Bitmap = image
         buttonsInvisible()
 
-        doAsync {
-            imageView.setOnTouchListener { imageView, event ->
-                when (event!!.action) {
-                    ACTION_DOWN or ACTION_MOVE -> {
-                        var x = event.x.toInt()
-                        var y = event.y.toInt()
-                        if (x >= 0 && x < image.width) {
-                            if (y >= 0 && y < image.height) {
-                                for (i in 0 until 21) {
-                                    for (j in 0 until 21) {
-                                        x = x - 10 + i
-                                        y = y - 10 + j
-                                        xCoordinates[count] = x
-                                        yCoordinates[count] = y
-                                        pixelValue[count] = image.getPixel(x, y)
-                                        count++
-                                    }
+        viewRet.setOnTouchListener { view, event ->
+            when (event!!.action) {
+                ACTION_DOWN or ACTION_MOVE -> {
+                    var x = event.x.toInt()
+                    var y = event.y.toInt()
+                    if (x >= 0 && x < image.width) {
+                        if (y >= 0 && y < image.height) {
+                            for (i in 0 until 21) {
+                                for (j in 0 until 21) {
+                                    x = x - 10 + i
+                                    y = y - 10 + j
+                                    xCoordinates[count] = x
+                                    yCoordinates[count] = y
+                                    pixelValue[count] = image.getPixel(x, y)
+                                    count++
                                 }
                             }
                         }
                     }
-                    ACTION_UP -> {
-                        progressBarVisible()
+                }
+                ACTION_UP -> {
+                    progressBarVisible()
+                    doAsync {
                         editableImage =
                             retouchAlg(image, pixelValue, count, xCoordinates, yCoordinates)
+                        uiThread {
+                            imageView.setImageBitmap(editableImage)
+                            progressBarInvisible()
+                            buttonsVisible()
+                            Toast.makeText(
+                                this@EditingActivity, "Выполнена ретушь",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
                 }
-                imageView.onTouchEvent(event)
             }
-            uiThread {
-                imageView.setImageBitmap(editableImage)
-                progressBarInvisible()
-                buttonsVisible()
-                Toast.makeText(this@EditingActivity, "Выполнена ретушь", Toast.LENGTH_SHORT)
-                    .show()
-            }
+            view.onTouchEvent(event)
         }
     }
 
@@ -924,30 +925,111 @@ class EditingActivity : AppCompatActivity() {
     }
 
     //----------нерезкое маскирование
-    private fun unsharpMasking(originalImage: Bitmap){
+    private fun unsharpMasking(originalImage: Bitmap) {
         var editableImage: Bitmap = originalImage
         var amount = 0
         var threshold = 0
         var radius = 0
+        var k = 0
 
         cancelVisible()
         buttonsInvisible()
+        seekBarVisible(seekBar1, text1)
 
-        seekBarVisible(seekBar1, text3)
-        seekBarVisible(seekBar1, text4)
-        seekBarVisible(seekBar1, text2)
+        cancelButton.setOnClickListener {
+            imageView.setImageBitmap(originalImage)
+            progressBarInvisible()
+            buttonsVisible()
+            cancelInvisible()
+            allowInvisible()
+            seekBarInvisible(seekBar1, text1)
+        }
+        allowButton.setOnClickListener {
+            imageView.setImageBitmap(editableImage)
+            progressBarInvisible()
+            buttonsVisible()
+            cancelInvisible()
+            allowInvisible()
+            seekBarInvisible(seekBar1, text1)
+        }
 
         seekBar1.max = 0
         seekBar1.max = 100
         seekBar1.progress = 0
-        text4.text = "Эффект: 0"
-        text2.text = "Порог: 0"
-        text3.text = "Радиус: 0"
+        text1.text = "Эффект: 0"
+        Toast.makeText(
+            this@EditingActivity,
+            "Выберите параметр эффекта",
+            Toast.LENGTH_SHORT
+        ).show()
+
+        seekBar1.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar1: SeekBar, progess: Int, fromUser: Boolean) {
+                if (k == 0 && threshold == 0 && radius == 0 && amount == 0) {
+                    amount = seekBar1.progress
+                    text1.text = seekBar1.progress.toString()
+                }
+                if (k == 1 && threshold == 0 && radius == 0 && amount != 0) {
+                    threshold = seekBar1.progress
+                    text1.text = seekBar1.progress.toString()
+                }
+                if (k == 2 && radius == 0 && threshold != 0 && amount != 0) {
+                    radius = seekBar1.progress
+                    text1.text = seekBar1.progress.toString()
+                }
+            }
+
+            override fun onStartTrackingTouch(seek: SeekBar) {
+            }
+
+            override fun onStopTrackingTouch(seekBar1: SeekBar) {
+                if (k == 0 && threshold == 0 && radius == 0 && amount != 0) {
+                    seekBar1.progress = 0
+                    text1.text = "Порог: 0"
+                    Toast.makeText(
+                        this@EditingActivity,
+                        "Выберите параметр порога",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    k = 1
+                }
+                if (k == 1 && radius == 0 && threshold != 0 && amount != 0) {
+                    seekBar1.progress = 0
+                    text1.text = "Радиус: 0"
+                    Toast.makeText(
+                        this@EditingActivity,
+                        "Выберите параметр радиуса",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    k = 2
+                }
+                if (k == 2 && radius != 0 && threshold != 0 && amount != 0) {
+                    seekBarInvisible(seekBar1, text1)
+                    progressBarVisible()
+                    k == 0
+                    doAsync {
+                        cancelInvisible()
+                        editableImage = unsharpAlg(amount, threshold, radius, editableImage)
+
+                        uiThread {
+                            imageView.setImageBitmap(editableImage)
+                            progressBarInvisible()
+                            allowVisible()
+                            cancelVisible()
+                            Toast.makeText(
+                                this@EditingActivity,
+                                "Применено нерезкое маскирование",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                }
+            }
+        })
     }
 
     //---------нерезкое маскирование
-    private fun unsharpAlg(
-        amount: Int, threshold: Int, radius: Int, image: Bitmap): Bitmap {
+    private fun unsharpAlg(amount: Int, threshold: Int, radius: Int, image: Bitmap): Bitmap {
         var red = 0
         var green = 0
         var blue = 0
@@ -1020,7 +1102,7 @@ class EditingActivity : AppCompatActivity() {
         var index = 0
         val newColors = IntArray(width)
         for (y in 0 until height) {
-            var hits = 0
+            var count = 0
             var red: Long = 0
             var green: Long = 0
             var blue: Long = 0
@@ -1033,7 +1115,7 @@ class EditingActivity : AppCompatActivity() {
                         green -= Color.green(color).toLong()
                         blue -= Color.blue(color).toLong()
                     }
-                    hits--
+                    count--
                 }
                 val newPixel = x + halfRange
                 if (newPixel < width) {
@@ -1043,14 +1125,14 @@ class EditingActivity : AppCompatActivity() {
                         green += Color.green(color).toLong()
                         blue += Color.blue(color).toLong()
                     }
-                    hits++
+                    count++
                 }
                 if (x >= 0) {
                     newColors[x] = Color.argb(
                         0xFF,
-                        (red / hits).toInt(),
-                        (green / hits).toInt(),
-                        (blue / hits).toInt()
+                        (red / count).toInt(),
+                        (green / count).toInt(),
+                        (blue / count).toInt()
                     )
                 }
             }
@@ -1066,7 +1148,7 @@ class EditingActivity : AppCompatActivity() {
         val oldPixelOffset = -(halfRange + 1) * width
         val newPixelOffset = halfRange * width
         for (x in 0 until width) {
-            var hits = 0
+            var count = 0
             var red: Long = 0
             var green: Long = 0
             var blue: Long = 0
@@ -1080,7 +1162,7 @@ class EditingActivity : AppCompatActivity() {
                         green -= Color.green(color).toLong()
                         blue -= Color.blue(color).toLong()
                     }
-                    hits--
+                    count--
                 }
                 val newPixel = y + halfRange
                 if (newPixel < height) {
@@ -1090,14 +1172,14 @@ class EditingActivity : AppCompatActivity() {
                         green += Color.green(color).toLong()
                         blue += Color.blue(color).toLong()
                     }
-                    hits++
+                    count++
                 }
                 if (y >= 0) {
                     newColors[y] = Color.argb(
                         0xFF,
-                        (red / hits).toInt(),
-                        (green / hits).toInt(),
-                        (blue / hits).toInt()
+                        (red / count).toInt(),
+                        (green / count).toInt(),
+                        (blue / count).toInt()
                     )
                 }
                 index += width
